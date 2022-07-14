@@ -43,7 +43,7 @@ FLUSH PRIVILEGES;
 <dependency>
   <groupId>com.insistingon.binlogportal</groupId>
   <artifactId>binlogportal-spring-boot-starter</artifactId>
-  <version>1.0.11</version>
+  <version>1.0.16</version>
 </dependency>
 ```
 - 通过spring boot的application.yml配置启动器
@@ -66,9 +66,11 @@ binlogportal:
       user-name: binlogportal
       password: 123456
       handler-list: [logEventHandler] # 该数据库使用的事件处理器，名称为spring的bean name
-  http-handler: # 启用自带的http事件处理器，可发送请求
-    url-list: [http://127.0.0.1:8988/testit] # 要发送的url列表，http参数为统一的格式
-    result-callback: httpCallBack # 配置自定义的结果处理器，需要实现IHttpCallback接口，值为bean name
+      http-handler: # 启用自带的http事件处理器，可发送请求
+      url-list: [http://127.0.0.1:8988/testit] # 要发送的url列表，http参数为统一的格式
+      result-callback: httpCallBack # 配置自定义的结果处理器，需要实现IHttpCallback接口，值为bean name
+      database-name: [ test,demo ] #需要同步的数据库名称，默认同步所有
+      data-tables: [ test,demo ] #需要同步的表 默认同步所有
 ```
 - Starter启动
     - spring boot autoconfig启动成功后，会把BinlogPortalStarter的实例注入到IOC中
