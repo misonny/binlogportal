@@ -10,22 +10,37 @@ import com.insistingon.binlogportal.position.IPositionHandler;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author Administrator
+ */
 public class BinlogPortalConfig {
-    //配置列表
+    /**
+     * 配置列表
+     */
     Map<String, SyncConfig> syncConfigList = new HashMap<>();
 
-    //binlog位点处理器
+    /**
+     * binlog位点处理器
+     */
     IPositionHandler positionHandler;
 
-    //分布式处理器
+    /**
+     * 分布式处理器
+     */
     IDistributedHandler distributedHandler;
 
-    //LifeCycleEvent监听器
+    /**
+     * LifeCycleEvent监听器
+     */
     ILifeCycleFactory lifeCycleFactory = new BaseLifeCycleListenerFactory();
 
     IClientFactory clientFactory = new BinaryLogClientFactory();
 
-    //增加配置项
+    /**
+     * 增加配置项
+     * @param key
+     * @param syncConfig
+     */
     public void addSyncConfig(String key, SyncConfig syncConfig) {
         syncConfigList.put(key, syncConfig);
     }

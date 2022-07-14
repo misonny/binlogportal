@@ -23,7 +23,9 @@ public class RedisDistributedHandler implements IDistributedHandler {
 
     private final Logger log = LoggerFactory.getLogger(RedisDistributedHandler.class);
 
-    //redis配置，支持集群模式
+    /**
+     * redis配置，支持集群模式
+     */
     RedisConfig redisConfig;
 
     public RedisDistributedHandler(RedisConfig redisConfig) {

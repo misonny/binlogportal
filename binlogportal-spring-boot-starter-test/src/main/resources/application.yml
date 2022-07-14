@@ -19,6 +19,8 @@ binlogportal:
       user-name: binlogportal
       password: 123456
       handler-list: [logEventHandler] # 该数据库使用的事件处理器，名称为spring的bean name
+      database-name: [eam_dev,demo] #需要同步的数据库名称，默认同步所有
+      data-tables: [jimu_dict,jimu_dict_item,jimu_report,jimu_report_data_source,jimu_report_db,jimu_report_db_field,jimu_report_db_param,jimu_report_map,jimu_report_share] #需要同步的表 默认同步所有
 #  http-handler: # 启用自带的http时间处理器，可发送请求
 #    url-list: [http://127.0.0.1:8988/testit] # 要发送的url列表，http参数为统一的格式
 #    result-callback: httpCallBack # 配置自定义的结果处理器，需要实现IHttpCallback接口，值为bean name

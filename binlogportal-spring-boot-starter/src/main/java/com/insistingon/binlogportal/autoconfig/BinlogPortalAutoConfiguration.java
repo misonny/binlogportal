@@ -22,6 +22,9 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Map;
 
+/**
+ * @author Administrator
+ */
 @Configuration
 @EnableConfigurationProperties(BinlogPortalBootConfig.class)
 @ConditionalOnClass(BinlogPortalStarter.class)
@@ -64,6 +67,9 @@ public class BinlogPortalAutoConfiguration {
                     syncConfig.addEventHandlerList(eventHandlerList.get(eventHandler));
                 });
             }
+            syncConfig.setDatabaseName(val.getDatabaseName());
+            syncConfig.setDataTables(val.getDataTables());
+
             if (httpRequestEventHandler != null) {
                 syncConfig.addEventHandlerList(httpRequestEventHandler);
             }

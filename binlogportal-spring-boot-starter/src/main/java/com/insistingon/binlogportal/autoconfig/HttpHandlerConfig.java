@@ -2,6 +2,9 @@ package com.insistingon.binlogportal.autoconfig;
 
 import java.util.List;
 
+/**
+ * @author Administrator
+ */
 public class HttpHandlerConfig {
     private List<String> urlList;
     private String resultCallback;

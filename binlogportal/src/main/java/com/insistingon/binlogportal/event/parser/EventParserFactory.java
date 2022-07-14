@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 事件解析器工厂
+ * @author Administrator
  */
 public class EventParserFactory {
     private static final Logger log = LoggerFactory.getLogger(EventParserFactory.class);

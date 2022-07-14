@@ -4,11 +4,11 @@ package com.insistingon.binlogportal.event;
  * @author Administrator
  */
 
-public enum EventEntityType {
-    UPDATE("update"),
-    INSERT("insert"),
-    DELETE("delete"),
-    ALTER("alter");
+public enum EventEntityMode {
+    SBR("STATEMENT模式（SBR）"),
+    RBR("ROW模式（RBR）"),
+    MBR("MIXED模式（MBR）");
+
 
     String desc;
 
@@ -20,7 +20,7 @@ public enum EventEntityType {
         this.desc = desc;
     }
 
-    EventEntityType(String desc) {
+    EventEntityMode(String desc) {
         this.desc = desc;
     }
 

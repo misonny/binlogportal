@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * 事件解析器接口
+ * @author Administrator
  */
 public interface IEventParser {
     List<EventEntity> parse(Event event) throws BinlogPortalException;

@@ -1,5 +1,8 @@
 package com.insistingon.binlogportal.position;
 
+/**
+ * @author Administrator
+ */
 public class BinlogPositionEntity {
     String binlogName;
     Long position;

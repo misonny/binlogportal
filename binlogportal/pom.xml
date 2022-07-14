@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.insistingon.binlogportal</groupId>
         <artifactId>binlogportal-parent</artifactId>
-        <version>1.0.13</version>
+        <version>1.0.15</version>
     </parent>
 
     <artifactId>binlogportal</artifactId>
@@ -30,11 +30,22 @@
             <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
         <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.11.3</version>
+        </dependency>
+
+<!--        <dependency>
             <groupId>com.github.shyiko</groupId>
             <artifactId>mysql-binlog-connector-java</artifactId>
             <version>0.21.0</version>
+        </dependency>-->
+        <dependency>
+            <groupId>com.zendesk</groupId>
+            <artifactId>mysql-binlog-connector-java</artifactId>
+            <version>0.25.6</version>
         </dependency>
 
         <dependency>
@@ -55,12 +66,7 @@
             <version>4.5.11</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.11.3</version>
-        </dependency>
+
 
         <dependency>
             <groupId>redis.clients</groupId>
@@ -78,6 +84,12 @@
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
             <version>3.13.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.3</version>
         </dependency>
 
     </dependencies>

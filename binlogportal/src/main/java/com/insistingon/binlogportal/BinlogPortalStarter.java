@@ -17,6 +17,7 @@ import java.util.List;
 
 /**
  * Starter
+ * @author Administrator
  */
 public class BinlogPortalStarter {
     private final Logger log = LoggerFactory.getLogger(BinlogPortalStarter.class);
@@ -81,7 +82,7 @@ public class BinlogPortalStarter {
 
     public static void main(String[] args) {
         SyncConfig syncConfig = new SyncConfig();
-        syncConfig.setHost("0.0.0.0");
+        syncConfig.setHost("127.0.0.1");
         syncConfig.setPort(3306);
         syncConfig.setUserName("binlogportal");
         syncConfig.setPassword("123456");

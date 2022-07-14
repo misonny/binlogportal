@@ -6,6 +6,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.Map;
 
+/**
+ * @author Administrator
+ */
 @ConfigurationProperties(prefix = "binlogportal")
 public class BinlogPortalBootConfig {
     private Map<String, DbConfig> dbConfig;

@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * BinaryLogClient Factory
+ * @author Administrator
  */
 public class BinaryLogClientFactory implements IClientFactory {
 
@@ -24,13 +25,15 @@ public class BinaryLogClientFactory implements IClientFactory {
 
     private IPositionHandler positionHandler;
 
-    //LifeCycleEvent监听器
+    // LifeCycleEvent监听器
     private ILifeCycleFactory lifeCycleFactory;
 
+    @Override
     public IPositionHandler getPositionHandler() {
         return positionHandler;
     }
 
+    @Override
     public void setPositionHandler(IPositionHandler positionHandler) {
         this.positionHandler = positionHandler;
     }
@@ -43,10 +46,12 @@ public class BinaryLogClientFactory implements IClientFactory {
         this.cache = cache;
     }
 
+    @Override
     public ILifeCycleFactory getLifeCycleFactory() {
         return lifeCycleFactory;
     }
 
+    @Override
     public void setLifeCycleFactory(ILifeCycleFactory lifeCycleFactory) {
         this.lifeCycleFactory = lifeCycleFactory;
     }
@@ -98,6 +103,7 @@ public class BinaryLogClientFactory implements IClientFactory {
             multiEventHandlerListener.setEventParserDispatcher(EventParserFactory.getEventParserDispatcher(syncConfig));
             //保存配置信息
             multiEventHandlerListener.setSyncConfig(syncConfig);
+
             //设置binlog位点信息
             multiEventHandlerListener.setPositionHandler(positionHandler);
             //注册配置信息中的事件处理器

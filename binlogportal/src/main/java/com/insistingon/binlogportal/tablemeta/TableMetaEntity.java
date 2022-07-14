@@ -3,6 +3,9 @@ package com.insistingon.binlogportal.tablemeta;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Administrator
+ */
 public class TableMetaEntity {
     private Long tableId;
     private String dbName;

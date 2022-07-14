@@ -2,12 +2,19 @@ package com.insistingon.binlogportal.autoconfig;
 
 import java.util.List;
 
+/**
+ * @author Administrator
+ */
 public class DbConfig {
     String host;
     Integer port;
     String userName;
     String password;
     List<String> handlerList;
+    List<String> databaseName;
+    List<String> dataTables;
+
+
 
     public String getHost() {
         return host;
@@ -47,5 +54,21 @@ public class DbConfig {
 
     public void setHandlerList(List<String> handlerList) {
         this.handlerList = handlerList;
+    }
+
+    public List<String> getDatabaseName() {
+        return databaseName;
+    }
+
+    public void setDatabaseName(List<String> databaseName) {
+        this.databaseName = databaseName;
+    }
+
+    public List<String> getDataTables() {
+        return dataTables;
+    }
+
+    public void setDataTables(List<String> dataTables) {
+        this.dataTables = dataTables;
     }
 }

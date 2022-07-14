@@ -5,6 +5,9 @@ import com.insistingon.binlogportal.config.SyncConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author Administrator
+ */
 public class BaseLifeCycleEventListener implements BinaryLogClient.LifecycleListener {
 
     private final Logger log = LoggerFactory.getLogger(BaseLifeCycleEventListener.class);

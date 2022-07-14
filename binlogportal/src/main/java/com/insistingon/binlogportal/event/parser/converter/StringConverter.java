@@ -7,6 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * @author Administrator
+ */
 public class StringConverter implements IConverter<String> {
 
     @Override
