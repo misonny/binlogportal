@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -113,7 +114,7 @@ public class MultiEventHandlerListener implements IEventListener {
 				}
 				binlogPositionEntity.setServerId(event.getHeader().getServerId());
 				if (positionHandler != null) {
-					log.info("======> 事件头部信息：{} || BinLog数据位置信息：{} <====== ", event.toString(), binlogPositionEntity.toString());
+					log.debug("======> 事件头部信息：{} || BinLog数据位置信息：{} <====== ", event.toString(), binlogPositionEntity.toString());
 					positionHandler.savePosition(syncConfig, binlogPositionEntity);
 				}
 			}
@@ -121,7 +122,7 @@ public class MultiEventHandlerListener implements IEventListener {
 
 			//解析事件为统一实体
 			List<EventEntity> eventEntityList = eventParserDispatcher.parse(event);
-			if (eventEntityList != null) {
+			if (eventEntityList != null && eventEntityList.size() > 0) {
 				//循环调用处理器
 				eventEntityList.forEach(eventEntity -> {
 					eventHandlerList.forEach(eventHandler -> {
@@ -136,7 +137,7 @@ public class MultiEventHandlerListener implements IEventListener {
 			}
 
 
-		} catch (BinlogPortalException e) {
+		} catch (BinlogPortalException | SQLException e) {
 			log.error("=====> Binlog 日志事件异常：，", e.getMessage(), e);
 		}
 	}

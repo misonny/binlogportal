@@ -4,6 +4,7 @@ import com.github.shyiko.mysql.binlog.event.Event;
 import com.insistingon.binlogportal.BinlogPortalException;
 import com.insistingon.binlogportal.event.EventEntity;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -11,5 +12,5 @@ import java.util.List;
  * @author Administrator
  */
 public interface IEventParser {
-    List<EventEntity> parse(Event event) throws BinlogPortalException;
+    List<EventEntity> parse(Event event) throws BinlogPortalException, SQLException;
 }

@@ -2,6 +2,7 @@ package com.insistingon.binlogportal.event.parser.utils;
 
 import com.github.shyiko.mysql.binlog.event.QueryEventData;
 import com.insistingon.binlogportal.config.SyncConfig;
+import com.insistingon.binlogportal.event.EventEntityType;
 import com.insistingon.binlogportal.tablemeta.TableMetaEntity;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -20,17 +21,55 @@ public class StringUtils extends org.apache.commons.lang.StringUtils {
 	/**
 	 * 说明：TODO 根据SQL 截取表名
 	 *
-	 * @param sql
+	 * @param SQL
 	 * @return java.lang.String
 	 * @date: 2022-7-12 15:57
 	 */
-	public static String getTableName(String sql) {
-		if (org.apache.commons.lang.StringUtils.isBlank(sql)||!sql.contains(".")) {
-			return sql;
+	public static String getTableName(String SQL) {
+		if (!StringUtils.isBlank(SQL) && !SQL.contains("`.`")) {
+			if (EventEntityType.isCrudEventType(SQL.substring(0, 6))) {
+				SQL = SQL.substring(SQL.indexOf("`") + 1);
+				SQL = org.apache.commons.lang.StringUtils.substringBefore(SQL, "`");
+				return SQL;
+			}
+
 		}
-		sql = sql.substring(sql.indexOf(".") + 2);
-		sql = sql.substring(0, sql.indexOf("`"));
-		return sql;
+		if (!StringUtils.isBlank(SQL) && SQL.contains("`.`")) {
+			SQL = SQL.substring(SQL.indexOf("`.`") + 3);
+			SQL = SQL.substring(0, SQL.indexOf("`"));
+			return SQL;
+		}
+		return SQL;
+	}
+
+	/**
+	 * 说明：TODO 根据SQL 截取数据ID
+	 * @param SQL
+	 * @return java.lang.String
+	 * @date: 2022-7-15 12:02
+	 */
+	public static String getDataId(String SQL) {
+		if (!org.apache.commons.lang.StringUtils.isBlank(SQL)) {
+			String EventType = SQL.substring(0, 6);
+			if (EventEntityType.isUdEventType(EventType)) {
+				SQL = org.apache.commons.lang.StringUtils.substringAfterLast(SQL,"=").trim();
+				if (SQL.contains("'")) {
+					SQL = org.apache.commons.lang.StringUtils.substring(SQL, 1, SQL.lastIndexOf("'"));
+				}
+			}
+
+			if (EventEntityType.isInertEventType(EventType)) {
+				SQL = org.apache.commons.lang.StringUtils.substringAfter(SQL, "VALUES");
+				SQL = org.apache.commons.lang.StringUtils.substring(SQL, SQL.indexOf("(") + 1, SQL.indexOf(","));
+				if (SQL.contains("'")) {
+					SQL = org.apache.commons.lang.StringUtils.substring(SQL, 1, SQL.lastIndexOf("'"));
+				}
+				return SQL;
+			}
+			return SQL;
+		}
+
+		return SQL;
 	}
 
 	public static boolean isDbAndTableNull(SyncConfig syncConfig) {

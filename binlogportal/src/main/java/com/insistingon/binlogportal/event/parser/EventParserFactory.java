@@ -1,6 +1,7 @@
 package com.insistingon.binlogportal.event.parser;
 
 import com.insistingon.binlogportal.config.SyncConfig;
+import com.insistingon.binlogportal.position.IPositionHandler;
 import com.insistingon.binlogportal.tablemeta.TableMetaFactory;
 import com.insistingon.binlogportal.BinlogPortalException;
 import org.slf4j.Logger;
@@ -17,10 +18,11 @@ public class EventParserFactory {
      * 获取事件解析调度器
      *
      * @param syncConfig
+     * @param positionHandler
      * @return
      */
-    public static IEventParserDispatcher getEventParserDispatcher(SyncConfig syncConfig) throws BinlogPortalException {
+    public static IEventParserDispatcher getEventParserDispatcher(SyncConfig syncConfig, IPositionHandler positionHandler) throws BinlogPortalException {
         //目前只有一种解析器，这里可扩展为根据syncConfig的配置获取不同的解析器
-        return new CommonEventParserDispatcher(new TableMetaFactory(syncConfig));
+        return new CommonEventParserDispatcher(new TableMetaFactory(syncConfig),positionHandler);
     }
 }

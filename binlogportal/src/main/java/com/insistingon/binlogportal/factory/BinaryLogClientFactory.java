@@ -100,7 +100,7 @@ public class BinaryLogClientFactory implements IClientFactory {
             //创建多事件统一处理器
             MultiEventHandlerListener multiEventHandlerListener = new MultiEventHandlerListener();
             //设置事件解析器
-            multiEventHandlerListener.setEventParserDispatcher(EventParserFactory.getEventParserDispatcher(syncConfig));
+            multiEventHandlerListener.setEventParserDispatcher(EventParserFactory.getEventParserDispatcher(syncConfig,positionHandler));
             //保存配置信息
             multiEventHandlerListener.setSyncConfig(syncConfig);
 
