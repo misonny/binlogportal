@@ -205,12 +205,12 @@ public class UpdateEventParser implements IEventParser {
 				Long time1 = DateUtil.parse(date).getTime();
 				positionHandler.setCacheObject(key, time1, CommonConstants.TIMEOUT, TimeUnit.MINUTES);
 				if (time1.equals(time)) {
-					log.info("=====> [RBR-UPDATE] 数据表更新时间 [update_time] 字段 [{}]  数据更新时间 [{}] 与 缓存更新时间 [{}] 相同、本次不同步! <=====", date, time1, time);
+					log.info("=====> [RBR-UPDATE] 数据更新时间 [update_time] 字段 [{}]  数据更新时间 [{}] 与 缓存更新时间 [{}] 相同、本次不同步! <=====", date, time1, time);
 					return true;
 				}
 			}
 		} catch (BinlogPortalException e) {
-			log.error("=====> [RBR-UPDATE] 验证重复数据异常：[{}] <=====", e.getCause().getMessage());
+			log.error("=====> [RBR-UPDATE] 验证重复数据异常：[{}] ，异常原因：[{}]<=====", e.getMessage(),e.getCause().getMessage());
 			return true;
 		}
 		return false;

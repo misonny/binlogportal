@@ -129,16 +129,15 @@ public class MultiEventHandlerListener implements IEventListener {
 						try {
 							eventHandler.process(eventEntity);
 						} catch (BinlogPortalException e) {
-							log.error(eventHandler.toString() + " process error:" + e.getMessage(), e);
+							log.error("{} process error:{} {} ",eventHandler.toString(), e.getMessage(), e);
 						}
 					});
 				});
 
 			}
 
-
 		} catch (BinlogPortalException | SQLException e) {
-			log.error("=====> Binlog 日志事件异常：，", e.getMessage(), e);
+			log.error("=====> Binlog 日志事件异常：异常信息：[{}] ，错误原因：[{}]", e.getMessage(), e.getCause().getMessage());
 		}
 	}
 }

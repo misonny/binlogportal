@@ -109,7 +109,7 @@ public class InsertEventParser implements IEventParser {
 			return true;
 		}
 
-		log.info("=====> [SBR-INSERT] 数据表创建时间 [create_time] 字段不存在，或 数据创建时间 [{}] 与 缓存创建时间 [{}] 相同、跳出同步! <=====", createTime, time);
+		log.info("=====> [SBR-INSERT] 数据创建时间 [create_time] 字段不存在，或 数据创建时间 [{}] 与 缓存创建时间 [{}] 相同、跳出同步! <=====", createTime, time);
 		return false;
 	}
 
@@ -176,7 +176,7 @@ public class InsertEventParser implements IEventParser {
 				}
 			}
 		} catch (BinlogPortalException e) {
-			log.error("=====> [RBR-INSERT] 验证重复数据异常：[{}] <=====", e.getCause().getMessage());
+			log.error("=====> [RBR-INSERT] 验证重复数据异常信息：[{}] ，异常原因：[{}]<=====", e.getMessage(),e.getCause().getMessage());
 			return true;
 		}
 		return false;

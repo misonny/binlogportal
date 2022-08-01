@@ -55,7 +55,7 @@ public class BinlogPortalStarter {
             try {
                 binaryLogClientList.add(binaryLogClientFactory.getClient(syncConfig));
             } catch (BinlogPortalException e) {
-                log.error(e.getMessage(), e);
+                log.error("=====> 生成Client异常：异常信息：{}，异常详情：{}",e.getMessage(), e);
             }
         });
 
@@ -66,7 +66,7 @@ public class BinlogPortalStarter {
                     binaryLogClient.setHeartbeatInterval(10 * 1000L);
                     binaryLogClient.connect();
                 } catch (IOException e) {
-                    log.error("binaryLogClient connect error!" + binaryLogClient.toString());
+                    log.error("=====> binaryLogClient connect error! {}",binaryLogClient.toString());
                 }
             }).start();
         });

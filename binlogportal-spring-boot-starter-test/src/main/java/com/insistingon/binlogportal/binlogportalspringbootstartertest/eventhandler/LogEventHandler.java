@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class LogEventHandler implements IEventHandler {
     @Override
     public void process(EventEntity eventEntity) throws BinlogPortalException {
-         log.info("======> 进入日志事件监听，参数信息：{} <======",eventEntity.getJsonFormatData());
+         log.info("======> 进入日志监听事件，参数信息：{} <======",eventEntity.getJsonFormatData());
     }
 
 //    @Override

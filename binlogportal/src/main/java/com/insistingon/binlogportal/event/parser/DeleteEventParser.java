@@ -15,7 +15,6 @@ import com.insistingon.binlogportal.event.parser.utils.StringUtils;
 import com.insistingon.binlogportal.position.IPositionHandler;
 import com.insistingon.binlogportal.tablemeta.TableMetaEntity;
 import com.insistingon.binlogportal.tablemeta.TableMetaFactory;
-import com.mysql.cj.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +98,7 @@ public class DeleteEventParser implements IEventParser {
 			return true;
 		}
 
-		log.info("=====> [SBR-DELETE] 数据表删除 [{}] 与 数据ID [{}] 已执行过、本次不同步! <=====", StringUtils.getTableName(queryEventData.getSql()), StringUtils.getDataId(queryEventData.getSql()));
+		log.info("=====> [SBR-DELETE] 数据删除 [{}] 与 数据ID [{}] 已执行过、本次不同步! <=====", StringUtils.getTableName(queryEventData.getSql()), StringUtils.getDataId(queryEventData.getSql()));
 		return false;
 	}
 
@@ -160,12 +159,12 @@ public class DeleteEventParser implements IEventParser {
 				Long time1 = DateUtil.parse(date).getTime();
 				positionHandler.setCacheObject(key, time1, CommonConstants.TIMEOUT, TimeUnit.MINUTES);
 				if (time1.equals(time)) {
-					log.info("=====> [RBR-DELETE] 数据表更新时间 [update_time] 字段 [{}]  数据更新时间 [{}] 与 缓存更新时间 [{}] 相同、本次不同步! <=====", date, time1, time);
+					log.info("=====> [RBR-DELETE] 数据更新时间 [update_time] 字段 [{}]  数据更新时间 [{}] 与 缓存更新时间 [{}] 相同、本次不同步! <=====", date, time1, time);
 					return true;
 				}
 			}
 		} catch (BinlogPortalException e) {
-			log.error("=====> [RBR-DELETE] 验证重复数据异常：[{}] <=====", e.getCause().getMessage());
+			log.error("=====> [RBR-DELETE] 验证重复数据异常信息：[{}] ，异常原因：[{}]<=====",e.getMessage(), e.getCause().getMessage());
 			return true;
 		}
 		return false;

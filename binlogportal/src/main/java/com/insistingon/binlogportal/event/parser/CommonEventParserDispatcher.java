@@ -86,7 +86,7 @@ public class CommonEventParserDispatcher implements IEventParserDispatcher {
 		 */
 		tableMetaFactory(event);
 
-		log.debug("=====> 指定同步数据库名称：{} ，数据库表：{} <=====", syncConfig.getDatabaseName().toString(), syncConfig.getDataTables().toString());
+//		log.debug("=====> 指定同步数据库名称：{} ，数据库表：{} <=====", syncConfig.getDatabaseName().toString(), syncConfig.getDataTables().toString());
 
 		/**
 		 * 如已配置 指定数据库名 或 数据库表 则根据配置表信息同步
@@ -105,24 +105,24 @@ public class CommonEventParserDispatcher implements IEventParserDispatcher {
 
 	private List<EventEntity> getEventEntityList(Event event) throws BinlogPortalException, SQLException {
 		if (EventType.QUERY.equals(event.getHeader().getEventType())) {
-			log.debug("======> 进入【SBR】事件信息处理：{} <====== ", event.getData().toString());
+//			log.debug("======> 进入[SBR]事件信息处理：{} <====== ", event.getData().toString());
 			QueryEventData queryEventData = event.getData();
 			/**
 			 * (queryEventData.getSql().contains(EventEntityType.INSERT.name()||queryEventData.getSql().contains(EventEntityType.ALTER.name())
 			 *  根据类型判断是否更新表结构
 			 */
 			if (!StringUtils.isBlank(queryEventData.getSql()) && queryEventData.getSql().contains(EventEntityType.INSERT.name())) {
-				log.debug("=====> 进入【SBR】 新增事件，{}", queryEventData.getSql());
+				log.debug("=====> 进入[SBR] 新增事件，{}", queryEventData.getSql());
 				return insertEventParser.parse(event);
 			}
 
 			if (!StringUtils.isBlank(queryEventData.getSql()) && queryEventData.getSql().contains(EventEntityType.UPDATE.name())) {
-				log.debug("=====>  进入【SBR】 更新事件，{}", queryEventData.getSql());
+				log.debug("=====>  进入[SBR] 更新事件，{}", queryEventData.getSql());
 				return updateEventParser.parse(event);
 			}
 
 			if (!StringUtils.isBlank(queryEventData.getSql()) && queryEventData.getSql().contains(EventEntityType.DELETE.name())) {
-				log.debug("=====>  进入【SBR】 删除事件，{}", queryEventData.getSql());
+				log.debug("=====>  进入[SBR] 删除事件，{}", queryEventData.getSql());
 				return deleteEventParser.parse(event);
 			}
 
@@ -131,19 +131,19 @@ public class CommonEventParserDispatcher implements IEventParserDispatcher {
 
 		//处理更新事件
 		if (EventType.isUpdate(event.getHeader().getEventType())) {
-			log.debug("=====> 进入【RBR】 更新事件，{}", event.getData().toString());
+			log.debug("=====> 进入[RBR] 更新事件，{}", event.getData().toString());
 			return updateEventParser.parse(event);
 		}
 
 		//处理插入事件
 		if (EventType.isWrite(event.getHeader().getEventType())) {
-			log.debug("=====> 进入【RBR】 新增事件，{}", event.getData().toString());
+			log.debug("=====> 进入[RBR] 新增事件，{}", event.getData().toString());
 			return insertEventParser.parse(event);
 		}
 
 		//删除事件处理
 		if (EventType.isDelete(event.getHeader().getEventType())) {
-			log.debug("=====> 执行【RBR】 删除事件，{}", event.getData().toString());
+			log.debug("=====> 执行[RBR] 删除事件，{}", event.getData().toString());
 			return deleteEventParser.parse(event);
 		}
 
