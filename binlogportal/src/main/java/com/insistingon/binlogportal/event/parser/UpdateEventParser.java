@@ -96,6 +96,7 @@ public class UpdateEventParser implements IEventParser {
 			}
 		}
 
+		log.debug("=====> [修改] 事件实体对象 [{}] 个 <=====",eventEntityList.size());
 
 		return eventEntityList;
 	}

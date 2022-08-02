@@ -90,7 +90,7 @@ public class InsertEventParser implements IEventParser {
 				getSbrWriteEventEntity(event, eventEntityList, queryEventData);
 			}
 		}
-
+		log.debug("=====> [新增] 事件实体对象 [{}] 个 <=====",eventEntityList.size());
 		return eventEntityList;
 	}
 

@@ -1,15 +1,15 @@
 package com.insistingon.binlogportal.event;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.shyiko.mysql.binlog.event.Event;
 import com.insistingon.binlogportal.tablemeta.TableMetaEntity;
-import com.mysql.cj.util.StringUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * 事件实体，简化binlog事件，方便处理

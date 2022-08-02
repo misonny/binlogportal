@@ -15,12 +15,12 @@ binlogportal:
 
   db-config: # 数据库配置，可以有多个，key自定义即可 3896fefda1afc9081e
     d1:
-      host: 192.168.2.8
+      host: 192.168.2.135
       port: 3306
       user-name: binlogportal
-      password: 3896fefda1afc9081e
+      password: 123456
       handler-list: [logEventHandler] # 该数据库使用的事件处理器，名称为spring的bean name
-      database-name: [eam_dev,spd_test,spdv6_test] #需要同步的数据库名称，默认同步所有
+      database-name: [eam_dev,spd_test] #需要同步的数据库名称，默认同步所有
       data-tables: [com_contract,com_contract_details,rep_demo_dxtj,rep_demo_employee,rep_demo_gongsi,rep_demo_jianpiao,dep_depot, dep_depot_consign_delivery_detail, dep_depot_consign_delivery_detail_code, dep_depot_consign_delivery_order, fin_invoice_manage, fin_invoice_manage_detail, hos_certificate, hos_certificate_business_category, hos_delivery_order, hos_delivery_orders_detail, hos_delivery_orders_detail_uniquecode, hos_depot, hos_depot_outbound_detail, hos_depot_outbound_detail_code, hos_depot_outbound_order, hos_depot_stock, hos_depot_stock_code, hos_depot_stock_detail, hos_depot_stock_record, hos_foreign_surgical_pacakage, hos_foreign_surgical_pacakage_detail, hos_foreign_surgical_pacakage_detail_uniquecode, hos_hospital_area, hos_letter, hos_letter_cert, hos_letter_product, hos_organization, hos_organization_relation, hos_product, hos_product_code, hos_product_list, hos_product_price, hos_product_reg_cert, hos_purchase_order, hos_purchase_order_detail, hos_purchase_type, hos_supplier_union, rep_foreign_surgical_pacakage_product, sys_code_info, sys_department, sys_dictionary, sys_login_log, sys_menu, sys_menu_action, sys_role, sys_role_auth, sys_user, sys_user_role] #需要同步的表 默认同步所有
 #  http-handler: # 启用自带的http时间处理器，可发送请求
 #    url-list: [http://127.0.0.1:8988/testit] # 要发送的url列表，http参数为统一的格式

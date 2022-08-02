@@ -2,6 +2,7 @@ package com.insistingon.binlogportal.factory;
 
 import com.github.shyiko.mysql.binlog.BinaryLogClient;
 import com.github.shyiko.mysql.binlog.event.deserialization.EventDeserializer;
+import com.github.shyiko.mysql.binlog.network.SSLSocketFactory;
 import com.insistingon.binlogportal.BinlogPortalException;
 import com.insistingon.binlogportal.config.SyncConfig;
 import com.insistingon.binlogportal.event.MultiEventHandlerListener;
@@ -81,6 +82,7 @@ public class BinaryLogClientFactory implements IClientFactory {
                     EventDeserializer.CompatibilityMode.DATE_AND_TIME_AS_LONG,
                     EventDeserializer.CompatibilityMode.CHAR_AND_BINARY_AS_BYTE_ARRAY
             );
+
             client.setEventDeserializer(eventDeserializer);
             //设置slave的serverId，不同集群中，两个机器不能相同
             client.setServerId(getRandomServerId());

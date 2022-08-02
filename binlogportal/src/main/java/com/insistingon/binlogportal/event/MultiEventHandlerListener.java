@@ -114,7 +114,7 @@ public class MultiEventHandlerListener implements IEventListener {
 				}
 				binlogPositionEntity.setServerId(event.getHeader().getServerId());
 				if (positionHandler != null) {
-					log.debug("======> 事件头部信息：{} || BinLog数据位置信息：{} <====== ", event.toString(), binlogPositionEntity.toString());
+//					log.debug("======> BinLog事件头部信息：{} || BinLog数据位置信息：{} <====== ", event.toString(), binlogPositionEntity.toString());
 					positionHandler.savePosition(syncConfig, binlogPositionEntity);
 				}
 			}
@@ -129,7 +129,7 @@ public class MultiEventHandlerListener implements IEventListener {
 						try {
 							eventHandler.process(eventEntity);
 						} catch (BinlogPortalException e) {
-							log.error("{} process error:{} {} ",eventHandler.toString(), e.getMessage(), e);
+							log.error("=====> {} process error:{} {} ",eventHandler.toString(), e.getMessage(), e);
 						}
 					});
 				});

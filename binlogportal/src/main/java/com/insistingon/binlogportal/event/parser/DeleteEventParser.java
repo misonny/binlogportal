@@ -84,7 +84,7 @@ public class DeleteEventParser implements IEventParser {
 				getSbrEventEntityList(event, eventEntityList, queryEventData);
 			}
 		}
-
+		log.debug("=====> [删除] 事件实体对象 [{}] 个 <=====",eventEntityList.size());
 		return eventEntityList;
 	}
 
