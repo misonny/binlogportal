@@ -90,7 +90,7 @@ public class InsertEventParser implements IEventParser {
 				getSbrWriteEventEntity(event, eventEntityList, queryEventData);
 			}
 		}
-		log.debug("=====> [新增] 事件实体对象 [{}] 个 <=====",eventEntityList.size());
+		log.debug("=====> [新增] 事件实体对象 [{}] 个 <=====", eventEntityList.size());
 		return eventEntityList;
 	}
 
@@ -99,17 +99,17 @@ public class InsertEventParser implements IEventParser {
 		DataSource source = DruidDSFactory.get(queryEventData.getDatabase());
 		Entity entity = Db.use(source).queryOne(String.format("select * from %s where id=%s", StringUtils.getTableName(queryEventData.getSql()), StringUtils.getDataId(queryEventData.getSql())));
 
-		String key = queryEventData.getDatabase().concat("-").concat(StringUtils.getTableName(queryEventData.getSql())).concat("-sbr-update-").concat(StringUtils.getDataId(queryEventData.getSql()));
-		Long createTime = Objects.isNull(entity.getDate("create_time")) == true ? null : entity.getDate("create_time").getTime();
+		String key = queryEventData.getDatabase().concat("-").concat(StringUtils.getTableName(queryEventData.getSql())).concat("-sbr-insert-").concat(StringUtils.getDataId(queryEventData.getSql()));
+		Long createTime = Objects.isNull(entity.getDate("create_time")) == true ? null : entity.getDate("create_time").getTime() / 1000;
 		Long time = positionHandler.getCacheObject(key);
-		log.debug("=====> Redis.create_time：{} <=====", time);
+		log.debug("=====> Redis.create_time：{} ，Entity.create_time：[{}] <=====", time, createTime);
 		if (!Objects.isNull(createTime) && !createTime.equals(time)) {
-			log.debug("=====> Entity.create_time：{} <=====", createTime);
+			log.debug("=====> Entity.create_time：[{}] ，Redis.create_time [{}] <=====", createTime, time);
 			positionHandler.setCacheObject(key, createTime, CommonConstants.TIMEOUT, TimeUnit.MINUTES);
 			return true;
 		}
 
-		log.info("=====> [SBR-INSERT] 数据创建时间 [create_time] 字段不存在，或 数据创建时间 [{}] 与 缓存创建时间 [{}] 相同、跳出同步! <=====", createTime, time);
+		log.info("=====> [SBR-INSERT] 数据创建时间字段 [create_time] 不存在！或 数据创建时间 [{}] 与 缓存创建时间 [{}] 相同、跳出同步! <=====", createTime, time);
 		return false;
 	}
 
@@ -176,7 +176,7 @@ public class InsertEventParser implements IEventParser {
 				}
 			}
 		} catch (BinlogPortalException e) {
-			log.error("=====> [RBR-INSERT] 验证重复数据异常信息：[{}] ，异常原因：[{}]<=====", e.getMessage(),e.getCause().getMessage());
+			log.error("=====> [RBR-INSERT] 验证重复数据异常信息：[{}] ，异常原因：[{}]<=====", e.getMessage(), e.getCause().getMessage());
 			return true;
 		}
 		return false;

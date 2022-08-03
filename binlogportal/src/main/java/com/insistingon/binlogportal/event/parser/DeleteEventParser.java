@@ -84,21 +84,21 @@ public class DeleteEventParser implements IEventParser {
 				getSbrEventEntityList(event, eventEntityList, queryEventData);
 			}
 		}
-		log.debug("=====> [删除] 事件实体对象 [{}] 个 <=====",eventEntityList.size());
+		log.debug("=====> [删除] 事件实体对象 [{}] 个 <=====", eventEntityList.size());
 		return eventEntityList;
 	}
 
 	private boolean queryVerifyDataById(QueryEventData queryEventData) throws BinlogPortalException {
-		String key = String.format("%s-%s-%s-%s", queryEventData.getDatabase(), StringUtils.getTableName(queryEventData.getSql()), "sbr-delelte",StringUtils.getDataId(queryEventData.getSql()));
+		String key = String.format("%s-%s-%s-%s", queryEventData.getDatabase(), StringUtils.getTableName(queryEventData.getSql()), "sbr-delelte", StringUtils.getDataId(queryEventData.getSql()));
 		String value = positionHandler.getCacheObject(key);
-		log.debug("=====> Redis.delete：{} <=====", value);
+		log.debug("=====> Redis.delete-Value：[{}] <=====", value);
 		if (Objects.isNull(value)) {
-			log.debug("=====> Entity.delete：{} <=====", value);
-			positionHandler.setCacheObject(key, StringUtils.getDataId(queryEventData.getSql()), CommonConstants.TIMEOUT, TimeUnit.MINUTES);
+			log.debug("=====> Entity.delete-Key：[{}] <=====", key);
+			positionHandler.setCacheObject(key, StringUtils.getTableName(queryEventData.getSql()).concat(":" + StringUtils.getDataId(queryEventData.getSql())), CommonConstants.TIMEOUT, TimeUnit.MINUTES);
 			return true;
 		}
 
-		log.info("=====> [SBR-DELETE] 数据删除 [{}] 与 数据ID [{}] 已执行过、本次不同步! <=====", StringUtils.getTableName(queryEventData.getSql()), StringUtils.getDataId(queryEventData.getSql()));
+		log.info("=====> [SBR-DELETE] 删除数据表 [{}] 与 数据ID [{}] 已执行过、跳出同步! <=====", StringUtils.getTableName(queryEventData.getSql()), StringUtils.getDataId(queryEventData.getSql()));
 		return false;
 	}
 
@@ -127,7 +127,7 @@ public class DeleteEventParser implements IEventParser {
 				changeAfter.add(after[i]);
 				columnData.put(columnMetaDataList.get(i).getName(), after[i]);
 			}
-			if (queryVerifyData(after,tableMetaEntity,columnData)){
+			if (queryVerifyData(after, tableMetaEntity, columnData)) {
 				return;
 			}
 			EventEntity eventEntity = new EventEntity();
@@ -164,7 +164,7 @@ public class DeleteEventParser implements IEventParser {
 				}
 			}
 		} catch (BinlogPortalException e) {
-			log.error("=====> [RBR-DELETE] 验证重复数据异常信息：[{}] ，异常原因：[{}]<=====",e.getMessage(), e.getCause().getMessage());
+			log.error("=====> [RBR-DELETE] 验证重复数据异常信息：[{}] ，异常原因：[{}]<=====", e.getMessage(), e.getCause().getMessage());
 			return true;
 		}
 		return false;

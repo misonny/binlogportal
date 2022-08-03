@@ -96,7 +96,7 @@ public class UpdateEventParser implements IEventParser {
 			}
 		}
 
-		log.debug("=====> [修改] 事件实体对象 [{}] 个 <=====",eventEntityList.size());
+		log.debug("=====> [修改] 事件实体对象 [{}] 个 <=====", eventEntityList.size());
 
 		return eventEntityList;
 	}
@@ -114,16 +114,16 @@ public class UpdateEventParser implements IEventParser {
 		Entity entity = Db.use(source).queryOne(String.format("select * from %s where id=%s", StringUtils.getTableName(queryEventData.getSql()), StringUtils.getDataId(queryEventData.getSql())));
 
 		String key = queryEventData.getDatabase().concat("-").concat(StringUtils.getTableName(queryEventData.getSql())).concat("-sbr-update-").concat(StringUtils.getDataId(queryEventData.getSql()));
-		Long updateTime = Objects.isNull(entity.getStr("update_time")) == true ? null : DateUtil.parse(entity.getStr("update_time")).getTime();
+		Long updateTime = Objects.isNull(entity.getStr("update_time")) == true ? null : DateUtil.parse(entity.getStr("update_time")).getTime() / 1000;
 		Long time = positionHandler.getCacheObject(key);
-		log.debug("=====> Redis.update_time：{} <=====", time);
+		log.debug("=====> Redis.update_time：[{}] ，Entity.update_time：[{}] <=====", time, updateTime);
 		if (!Objects.isNull(updateTime) && !updateTime.equals(time)) {
-			log.debug("=====> Entity.update_time：{} <=====", updateTime);
+			log.debug("=====> Entity.update_time：{}，Redis.update_time：[{}] <=====", updateTime, time);
 			positionHandler.setCacheObject(key, updateTime, CommonConstants.TIMEOUT, TimeUnit.MINUTES);
 			return true;
 		}
 
-		log.info("=====> [SBR-UPDATE] 数据表更新时间 [update_time] 字段不存在 ，或 数据更新时间 [{}] 与 缓存更新时间 [{}] 相同、本次不同步! <=====", updateTime, time);
+		log.info("=====> [SBR-UPDATE] 数据表更新时间字段 [update_time] 不存在 ！ 或 数据更新时间 [{}] 与 缓存更新时间 [{}] 相同、跳出同步! <=====", updateTime, time);
 		return false;
 	}
 
@@ -211,7 +211,7 @@ public class UpdateEventParser implements IEventParser {
 				}
 			}
 		} catch (BinlogPortalException e) {
-			log.error("=====> [RBR-UPDATE] 验证重复数据异常：[{}] ，异常原因：[{}]<=====", e.getMessage(),e.getCause().getMessage());
+			log.error("=====> [RBR-UPDATE] 验证重复数据异常：[{}] ，异常原因：[{}]<=====", e.getMessage(), e.getCause().getMessage());
 			return true;
 		}
 		return false;
