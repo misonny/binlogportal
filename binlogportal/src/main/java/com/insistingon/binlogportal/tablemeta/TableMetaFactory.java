@@ -42,7 +42,7 @@ public class TableMetaFactory {
 			if (tableMetaEntityIdMap.get(tableId) != null) {
 				return tableMetaEntityIdMap.get(tableId);
 			} else {
-				String url = "jdbc:mysql://" + syncConfig.getHost() + ":" + syncConfig.getPort() + "/" + dbName;
+				String url = "jdbc:mysql://".concat(syncConfig.getHost()).concat(":") + syncConfig.getPort() + "/".concat(dbName).concat("?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&allowLoadLocalInfile=true");
 				connection = DriverManager.getConnection(url, syncConfig.getUserName(), syncConfig.getPassword());
 				DatabaseMetaData dbmd = connection.getMetaData();
 				ResultSet rs = dbmd.getColumns(dbName, dbName, tableName, null);

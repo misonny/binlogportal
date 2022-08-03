@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.insistingon.binlogportal</groupId>
         <artifactId>binlogportal-parent</artifactId>
-        <version>1.0.22</version>
+        <version>1.0.23</version>
     </parent>
 
     <artifactId>binlogportal</artifactId>
@@ -68,8 +68,6 @@
             <version>4.5.11</version>
             <scope>compile</scope>
         </dependency>
-
-
 
         <dependency>
             <groupId>redis.clients</groupId>

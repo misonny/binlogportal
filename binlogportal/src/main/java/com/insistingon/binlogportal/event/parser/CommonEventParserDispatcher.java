@@ -105,7 +105,7 @@ public class CommonEventParserDispatcher implements IEventParserDispatcher {
 
 	private List<EventEntity> getEventEntityList(Event event) throws BinlogPortalException, SQLException {
 		if (EventType.QUERY.equals(event.getHeader().getEventType())) {
-//			log.debug("======> 进入[SBR]事件信息处理：{} <====== ", event.getData().toString());
+			log.debug("======> 进入[SBR]事件信息处理：{} <====== ", event.getData().toString());
 			QueryEventData queryEventData = event.getData();
 			/**
 			 * (queryEventData.getSql().contains(EventEntityType.INSERT.name()||queryEventData.getSql().contains(EventEntityType.ALTER.name())

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class LogEventHandler implements IEventHandler {
     @Override
-    public void process(EventEntity eventEntity) throws BinlogPortalException {
+    public void process(EventEntity eventEntity) {
          log.info("======> 进入日志监听事件，参数信息：{} <======",eventEntity.getJsonFormatData());
     }
 

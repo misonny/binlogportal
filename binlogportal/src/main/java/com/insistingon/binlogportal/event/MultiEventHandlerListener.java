@@ -84,12 +84,15 @@ public class MultiEventHandlerListener implements IEventListener {
 	@Override
 	public void onEvent(Event event) {
 
-		onEventEntity(event);
+		try {
+			onEventEntity(event);
+		} catch (BinlogPortalException e) {
+			log.error("=====> Binlog 日志事件异常：异常信息：[{}] ，错误详情：[{}]", e.getMessage(), e);
+		}
 	}
 
-	private void onEventEntity(Event event) {
+	private void onEventEntity(Event event) throws BinlogPortalException {
 		try {
-
 			/*
 			 * 不计入position更新的事件类型
 			 * FORMAT_DESCRIPTION类型为binlog起始时间
@@ -101,16 +104,20 @@ public class MultiEventHandlerListener implements IEventListener {
 			//获取当前事件的类型
 			EventType eventType = event.getHeader().getEventType();
 			if (!excludePositionEventType.contains(eventType)) {
+//				log.info("=====> 事件类型：[{}] <=====", eventType);
 				BinlogPositionEntity binlogPositionEntity = new BinlogPositionEntity();
 				//处理rotate事件,这里会替换调binlog fileName
 				if (event.getHeader().getEventType().equals(EventType.ROTATE)) {
 					RotateEventData rotateEventData = (RotateEventData) event.getData();
 					binlogPositionEntity.setBinlogName(rotateEventData.getBinlogFilename());
 					binlogPositionEntity.setPosition(rotateEventData.getBinlogPosition());
+//					log.info("=====> 处理rotate事件,这里会替换调binlog fileName：[{}] <=====", binlogPositionEntity.toString());
+
 				} else { //统一处理事件对应的binlog position
 					binlogPositionEntity = positionHandler.getPosition(syncConfig);
 					EventHeaderV4 eventHeaderV4 = (EventHeaderV4) event.getHeader();
 					binlogPositionEntity.setPosition(eventHeaderV4.getPosition());
+//					log.info("=====> 统一处理事件对应的binlog position：[{}] <=====", binlogPositionEntity.toString());
 				}
 				binlogPositionEntity.setServerId(event.getHeader().getServerId());
 				if (positionHandler != null) {
@@ -129,7 +136,7 @@ public class MultiEventHandlerListener implements IEventListener {
 						try {
 							eventHandler.process(eventEntity);
 						} catch (BinlogPortalException e) {
-							log.error("=====> {} process error:{} {} ",eventHandler.toString(), e.getMessage(), e);
+							log.error("=====> {} process error: [{}] ， detail ：[{}] ", eventHandler.toString(), e.getMessage(), e);
 						}
 					});
 				});
@@ -137,7 +144,8 @@ public class MultiEventHandlerListener implements IEventListener {
 			}
 
 		} catch (BinlogPortalException | SQLException e) {
-			log.error("=====> Binlog 日志事件异常：异常信息：[{}] ，错误原因：[{}]", e.getMessage(), e.getCause().getMessage());
+//			log.error("=====> Binlog 日志事件异常：异常信息：[{}] ，错误详情：[{}]", e.getMessage(), e);
+			throw new BinlogPortalException(e);
 		}
 	}
 }

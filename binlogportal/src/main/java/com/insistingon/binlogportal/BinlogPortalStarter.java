@@ -68,7 +68,7 @@ public class BinlogPortalStarter {
 					binaryLogClient.setHeartbeatInterval(10 * 1000L);
 					binaryLogClient.connect();
 				} catch (IOException e) {
-					log.error("=====> binaryLogClient connect error! 异常信息：[{}] ，异常详情：[{}]", e.getMessage(), e);
+					log.error("=====> BinaryLogClient connect error! 异常信息：[{}] ，异常详情：[{}]", e.getMessage(), e);
 				}
 			}).start();
 		});

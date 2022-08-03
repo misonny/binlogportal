@@ -23,5 +23,12 @@ public interface IPositionHandler {
      * @param timeUnit 时间颗粒度
      */
     public <T> void setCacheObject(final String key, final T value, final Integer timeout, final TimeUnit timeUnit) throws BinlogPortalException;
+
+    /**
+     * 说明：TODO
+     * @param key
+     * @return T
+     * @date: 2022-8-3 10:06
+     */
     public <T> T getCacheObject(final String key)throws BinlogPortalException;
 }
