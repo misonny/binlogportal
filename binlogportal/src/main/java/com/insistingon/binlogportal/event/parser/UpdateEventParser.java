@@ -128,7 +128,9 @@ public class UpdateEventParser implements IEventParser {
 	}
 
 
-	private void getSbrUpdateEventEntity(Event event, List<EventEntity> eventEntityList, QueryEventData queryEventData) {
+	private void getSbrUpdateEventEntity(Event event, List<EventEntity> eventEntityList, QueryEventData queryEventData) throws SQLException {
+		DataSource source = DruidDSFactory.get(queryEventData.getDatabase());
+		Entity entity = Db.use(source).queryOne(String.format("select * from %s where id=%s", StringUtils.getTableName(queryEventData.getSql()), StringUtils.getDataId(queryEventData.getSql())));
 
 		EventEntity eventEntity = new EventEntity();
 		eventEntity.setEvent(event);
@@ -138,6 +140,8 @@ public class UpdateEventParser implements IEventParser {
 		eventEntity.setEventEntityType(EventEntityType.UPDATE);
 		eventEntity.setEventEntityMode(EventEntityMode.SBR);
 		eventEntity.setSql(queryEventData.getSql());
+		eventEntity.setSyncIdent(Objects.isNull(entity.getDate("update_time")) ? null : entity.getDate("update_time").getTime());
+
 		eventEntityList.add(eventEntity);
 	}
 
@@ -178,6 +182,8 @@ public class UpdateEventParser implements IEventParser {
 			eventEntity.setChangeAfter(changeAfter);
 			eventEntity.setColumnData(columnData);
 			eventEntity.setDataId(after[0]);
+			String updateTime = String.valueOf(columnData.get("update_time"));
+			eventEntity.setSyncIdent(Objects.isNull(DateUtil.parse(updateTime)) ? null : DateUtil.parse(updateTime).getTime());
 
 			eventEntityList.add(eventEntity);
 		});

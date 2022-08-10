@@ -100,7 +100,7 @@ public class InsertEventParser implements IEventParser {
 		Entity entity = Db.use(source).queryOne(String.format("select * from %s where id=%s", StringUtils.getTableName(queryEventData.getSql()), StringUtils.getDataId(queryEventData.getSql())));
 
 		String key = queryEventData.getDatabase().concat("-").concat(StringUtils.getTableName(queryEventData.getSql())).concat("-sbr-insert-").concat(StringUtils.getDataId(queryEventData.getSql()));
-		Long createTime = Objects.isNull(entity.getDate("create_time")) == true ? null : entity.getDate("create_time").getTime() / 1000;
+		Long createTime = Objects.isNull(entity.getDate("create_time")) == true ? null : entity.getDate("create_time").getTime();
 		Long time = positionHandler.getCacheObject(key);
 		log.debug("=====> Redis.create_time：{} ，Entity.create_time：[{}] <=====", time, createTime);
 		if (!Objects.isNull(createTime) && !createTime.equals(time)) {
@@ -113,7 +113,9 @@ public class InsertEventParser implements IEventParser {
 		return false;
 	}
 
-	private void getSbrWriteEventEntity(Event event, List<EventEntity> eventEntityList, QueryEventData queryEventData) {
+	private void getSbrWriteEventEntity(Event event, List<EventEntity> eventEntityList, QueryEventData queryEventData) throws SQLException {
+		DataSource source = DruidDSFactory.get(queryEventData.getDatabase());
+		Entity entity = Db.use(source).queryOne(String.format("select * from %s where id=%s", StringUtils.getTableName(queryEventData.getSql()), StringUtils.getDataId(queryEventData.getSql())));
 		EventEntity eventEntity = new EventEntity();
 		eventEntity.setEvent(event);
 		eventEntity.setDatabaseName(queryEventData.getDatabase());
@@ -122,6 +124,7 @@ public class InsertEventParser implements IEventParser {
 		eventEntity.setEventEntityType(EventEntityType.INSERT);
 		eventEntity.setEventEntityMode(EventEntityMode.SBR);
 		eventEntity.setSql(queryEventData.getSql());
+		eventEntity.setSyncIdent(Objects.isNull(entity.getDate("create_time")) ? null : entity.getDate("create_time").getTime());
 		eventEntityList.add(eventEntity);
 	}
 
@@ -153,6 +156,10 @@ public class InsertEventParser implements IEventParser {
 			eventEntity.setColumnsData(columnMetaDataList);
 			eventEntity.setChangeAfter(changeAfter);
 			eventEntity.setColumnData(columnData);
+			eventEntity.setDataId(after[0]);
+			String createTime = String.valueOf(Optional.ofNullable(columnData.get("create_time")).orElse(null));
+			eventEntity.setSyncIdent(Objects.isNull(createTime) ? null : DateUtil.parse(createTime).getTime());
+
 			eventEntityList.add(eventEntity);
 		});
 	}
@@ -166,7 +173,7 @@ public class InsertEventParser implements IEventParser {
 
 		try {
 			Long time = positionHandler.getCacheObject(key);
-			String date = (String) Optional.ofNullable(columnData.get("update_time")).orElse(columnData.get("update_time"));
+			String date = (String) Optional.ofNullable(columnData.get("create_time")).orElse(columnData.get("create_time"));
 			if (!Objects.isNull(date)) {
 				Long time1 = DateUtil.parse(date).getTime();
 				positionHandler.setCacheObject(key, time1, CommonConstants.TIMEOUT, TimeUnit.MINUTES);

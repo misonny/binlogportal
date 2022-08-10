@@ -94,7 +94,8 @@ public class DeleteEventParser implements IEventParser {
 		log.debug("=====> Redis.delete-Value：[{}] <=====", value);
 		if (Objects.isNull(value)) {
 			log.debug("=====> Entity.delete-Key：[{}] <=====", key);
-			positionHandler.setCacheObject(key, StringUtils.getTableName(queryEventData.getSql()).concat(":" + StringUtils.getDataId(queryEventData.getSql())), CommonConstants.TIMEOUT, TimeUnit.MINUTES);
+			value = StringUtils.getTableName(queryEventData.getSql()).concat("-" + StringUtils.getDataId(queryEventData.getSql()));
+			positionHandler.setCacheObject(key, value, CommonConstants.TIMEOUT, TimeUnit.MINUTES);
 			return true;
 		}
 
@@ -111,6 +112,7 @@ public class DeleteEventParser implements IEventParser {
 		eventEntity.setEventEntityType(EventEntityType.DELETE);
 		eventEntity.setEventEntityMode(EventEntityMode.SBR);
 		eventEntity.setSql(queryEventData.getSql());
+		eventEntity.setSyncIdent(Long.valueOf(StringUtils.getDataId(queryEventData.getSql())));
 		eventEntityList.add(eventEntity);
 	}
 
@@ -141,6 +143,8 @@ public class DeleteEventParser implements IEventParser {
 			eventEntity.setChangeAfter(changeAfter);
 			eventEntity.setColumnData(columnData);
 			eventEntity.setDataId(after[0]);
+			eventEntity.setSyncIdent(Long.valueOf(after[0]));
+
 			eventEntityList.add(eventEntity);
 		});
 	}

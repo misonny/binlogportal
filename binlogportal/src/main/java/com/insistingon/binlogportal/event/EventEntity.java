@@ -52,6 +52,11 @@ public class EventEntity {
 	String dataId;
 
 	/**
+	 * 同步鉴别标识（新增|创建时间、修改|更新时间、删除|数据ID）
+	 */
+	Long syncIdent;
+
+	/**
 	 * 新增、更新的字段与数据
 	 */
 	Map<String, Object> columnData;
@@ -128,6 +133,14 @@ public class EventEntity {
 
 	public void setDataId(String dataId) {
 		this.dataId = dataId;
+	}
+
+	public Long getSyncIdent() {
+		return syncIdent;
+	}
+
+	public void setSyncIdent(Long syncIdent) {
+		this.syncIdent = syncIdent;
 	}
 
 	public Map<String, Object> getColumnData() {
