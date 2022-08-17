@@ -1,5 +1,6 @@
 package com.insistingon.binlogportal.event.parser;
 
+import com.alibaba.druid.support.json.JSONUtils;
 import com.github.shyiko.mysql.binlog.event.Event;
 import com.github.shyiko.mysql.binlog.event.EventType;
 import com.github.shyiko.mysql.binlog.event.QueryEventData;
@@ -77,7 +78,7 @@ public class CommonEventParserDispatcher implements IEventParserDispatcher {
 	IEventParser deleteEventParser;
 
 	@Override
-	public List<EventEntity> parse(Event event) throws BinlogPortalException, SQLException {
+	public List<EventEntity> parse(Event event) throws BinlogPortalException, SQLException, NoSuchFieldException {
 		/*
 		 * table_id不固定对应一个表，它是表载入table cache时临时分配的，一个不断增长的变量
 		 * 连续往同一个table中进行多次DML操作，table_id不变。 一般来说，出现DDL操作时，table_id才会变化
@@ -105,24 +106,24 @@ public class CommonEventParserDispatcher implements IEventParserDispatcher {
 
 	private List<EventEntity> getEventEntityList(Event event) throws BinlogPortalException, SQLException {
 		if (EventType.QUERY.equals(event.getHeader().getEventType())) {
-			log.debug("======> 进入[SBR]事件信息处理：{} <====== ", event.getData().toString());
+//			log.debug("======> 进入[SBR]事件信息处理：{} <====== ", event.getData().toString());
 			QueryEventData queryEventData = event.getData();
 			/**
 			 * (queryEventData.getSql().contains(EventEntityType.INSERT.name()||queryEventData.getSql().contains(EventEntityType.ALTER.name())
 			 *  根据类型判断是否更新表结构
 			 */
 			if (!StringUtils.isBlank(queryEventData.getSql()) && queryEventData.getSql().contains(EventEntityType.INSERT.name())) {
-				log.debug("=====> 进入[SBR] 新增事件，{}", queryEventData.getSql());
+//				log.debug("=====> 进入[SBR] 新增事件，{}", queryEventData.getSql());
 				return insertEventParser.parse(event);
 			}
 
 			if (!StringUtils.isBlank(queryEventData.getSql()) && queryEventData.getSql().contains(EventEntityType.UPDATE.name())) {
-				log.debug("=====>  进入[SBR] 更新事件，{}", queryEventData.getSql());
+//				log.debug("=====>  进入[SBR] 更新事件，{}", queryEventData.getSql());
 				return updateEventParser.parse(event);
 			}
 
 			if (!StringUtils.isBlank(queryEventData.getSql()) && queryEventData.getSql().contains(EventEntityType.DELETE.name())) {
-				log.debug("=====>  进入[SBR] 删除事件，{}", queryEventData.getSql());
+//				log.debug("=====>  进入[SBR] 删除事件，{}", queryEventData.getSql());
 				return deleteEventParser.parse(event);
 			}
 
@@ -131,19 +132,19 @@ public class CommonEventParserDispatcher implements IEventParserDispatcher {
 
 		//处理更新事件
 		if (EventType.isUpdate(event.getHeader().getEventType())) {
-			log.debug("=====> 进入[RBR] 更新事件，{}", event.getData().toString());
+//			log.debug("=====> 进入[RBR] 更新处理事件，{}", event.getData().toString());
 			return updateEventParser.parse(event);
 		}
 
 		//处理插入事件
 		if (EventType.isWrite(event.getHeader().getEventType())) {
-			log.debug("=====> 进入[RBR] 新增事件，{}", event.getData().toString());
+//			log.debug("=====> 进入[RBR] 新增处理事件，{}",event.getData().toString());
 			return insertEventParser.parse(event);
 		}
 
 		//删除事件处理
 		if (EventType.isDelete(event.getHeader().getEventType())) {
-			log.debug("=====> 执行[RBR] 删除事件，{}", event.getData().toString());
+//			log.debug("=====> 执行[RBR] 删除处理事件，{}", event.getData().toString());
 			return deleteEventParser.parse(event);
 		}
 
@@ -151,10 +152,16 @@ public class CommonEventParserDispatcher implements IEventParserDispatcher {
 		return null;
 	}
 
-	private void tableMetaFactory(Event event) throws BinlogPortalException {
+	private void tableMetaFactory(Event event) throws BinlogPortalException, NoSuchFieldException {
 
 		if (EventType.TABLE_MAP.equals(event.getHeader().getEventType())) {
 			TableMapEventData tableMapEventData = event.getData();
+
+			if (!syncConfig.getDatabaseName().contains(tableMapEventData.getDatabase())){
+				log.debug("=====> 未配置同步数据库：[{}] 、跳过缓存<=====",tableMapEventData.getDatabase());
+				return;
+			}
+				log.debug("=====> 已配置同步数据库进行缓存信息：[{}] <=====",tableMapEventData.toString());
 			//table_map事件，要更新下tableMetaFactory中的tableId对应的信息缓存
 			tableMetaFactory.getTableMetaEntity(
 					tableMapEventData.getTableId(),

@@ -1,7 +1,7 @@
 package com.insistingon.binlogportal.tablemeta;
 
-import com.insistingon.binlogportal.config.SyncConfig;
 import com.insistingon.binlogportal.BinlogPortalException;
+import com.insistingon.binlogportal.config.SyncConfig;
 
 import java.sql.*;
 import java.util.HashMap;

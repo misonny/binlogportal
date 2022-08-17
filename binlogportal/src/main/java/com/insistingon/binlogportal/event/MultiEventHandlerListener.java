@@ -143,7 +143,7 @@ public class MultiEventHandlerListener implements IEventListener {
 
 			}
 
-		} catch (BinlogPortalException | SQLException e) {
+		} catch (BinlogPortalException | SQLException | NoSuchFieldException e) {
 //			log.error("=====> Binlog 日志事件异常：异常信息：[{}] ，错误详情：[{}]", e.getMessage(), e);
 			throw new BinlogPortalException(e);
 		}

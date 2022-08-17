@@ -12,5 +12,5 @@ import java.util.List;
  * @author Administrator
  */
 public interface IEventParserDispatcher {
-    public List<EventEntity> parse(Event event) throws BinlogPortalException, SQLException;
+    public List<EventEntity> parse(Event event) throws BinlogPortalException, SQLException, NoSuchFieldException;
 }

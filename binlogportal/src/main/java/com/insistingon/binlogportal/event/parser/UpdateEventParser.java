@@ -5,6 +5,7 @@ import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.db.ds.druid.DruidDSFactory;
 import cn.hutool.setting.Setting;
+import com.alibaba.druid.support.json.JSONUtils;
 import com.github.shyiko.mysql.binlog.event.Event;
 import com.github.shyiko.mysql.binlog.event.QueryEventData;
 import com.github.shyiko.mysql.binlog.event.UpdateRowsEventData;
@@ -55,12 +56,16 @@ public class UpdateEventParser implements IEventParser {
 		 * RBR 模式
 		 */
 		if (event.getData() instanceof UpdateRowsEventData) {
+
 			UpdateRowsEventData updateRowsEventData = event.getData();
 			TableMetaEntity tableMetaEntity = tableMetaFactory.getTableMetaEntity(updateRowsEventData.getTableId());
+			log.debug("=====> 进入 [RBR-UPDATE] 事件信息处理：[{}] <=====", Optional.ofNullable(tableMetaEntity).orElse(tableMetaEntity));
 			/**
 			 * 如已配置 指定数据库名 或 数据库表 则根据配置表信息同步
 			 */
 			if (StringUtils.isDbOrTableNull(syncConfig, tableMetaEntity)) {
+				log.info("=====> 进入指定配置 [RBR-UPDATE] 事件同步[tableMetaEntity] 表 [{}] 个 <=====", tableMetaEntity.toString());
+
 				getRbrUpdateRowsEventData(event, eventEntityList, updateRowsEventData, tableMetaEntity);
 
 			}
@@ -69,6 +74,8 @@ public class UpdateEventParser implements IEventParser {
 			 * 如未配置指定库和表名则所有同步
 			 */
 			if (StringUtils.isDbAndTableNull(syncConfig)) {
+				log.info("=====> 进入全量配置 [RBR-UPDATE] 事件同步[tableMetaEntity] 表 [{}] 个 <=====", tableMetaEntity.toString());
+
 				getRbrUpdateRowsEventData(event, eventEntityList, updateRowsEventData, tableMetaEntity);
 			}
 
@@ -79,6 +86,7 @@ public class UpdateEventParser implements IEventParser {
 		 */
 		if (event.getData() instanceof QueryEventData) {
 			QueryEventData queryEventData = event.getData();
+			log.debug("=====> 进入 [SBR-UPDATE] 事件信息处理：[{}] <=====", event.getData().toString());
 
 
 			/**
@@ -96,8 +104,6 @@ public class UpdateEventParser implements IEventParser {
 			}
 		}
 
-		log.debug("=====> [修改] 事件实体对象 [{}] 个 <=====", eventEntityList.size());
-
 		return eventEntityList;
 	}
 
@@ -114,11 +120,12 @@ public class UpdateEventParser implements IEventParser {
 		Entity entity = Db.use(source).queryOne(String.format("select * from %s where id=%s", StringUtils.getTableName(queryEventData.getSql()), StringUtils.getDataId(queryEventData.getSql())));
 
 		String key = queryEventData.getDatabase().concat("-").concat(StringUtils.getTableName(queryEventData.getSql())).concat("-sbr-update-").concat(StringUtils.getDataId(queryEventData.getSql()));
-		Long updateTime = Objects.isNull(entity.getStr("update_time")) == true ? null : DateUtil.parse(entity.getStr("update_time")).getTime() / 1000;
+		Long updateTime = Objects.isNull(entity.getStr("update_time")) ? null : DateUtil.parse(entity.getStr("update_time")).getTime();
+		log.info("=====> Redis.insert-key：[{}] ，Entity.update_time：[{}] <=====", key, updateTime);
 		Long time = positionHandler.getCacheObject(key);
-		log.debug("=====> Redis.update_time：[{}] ，Entity.update_time：[{}] <=====", time, updateTime);
+		log.info("=====> Redis.insert-value：[{}] ，Entity.update_time：[{}] <=====", time, updateTime);
 		if (!Objects.isNull(updateTime) && !updateTime.equals(time)) {
-			log.debug("=====> Entity.update_time：{}，Redis.update_time：[{}] <=====", updateTime, time);
+			log.info("=====> Entity.update_time：{}，Redis.update_time：[{}] <=====", updateTime, time);
 			positionHandler.setCacheObject(key, updateTime, CommonConstants.TIMEOUT, TimeUnit.MINUTES);
 			return true;
 		}
@@ -143,6 +150,7 @@ public class UpdateEventParser implements IEventParser {
 		eventEntity.setSyncIdent(Objects.isNull(entity.getDate("update_time")) ? null : entity.getDate("update_time").getTime());
 
 		eventEntityList.add(eventEntity);
+		log.debug("=====> [SBR-UPDATE] 事件同步[eventEntity]实体 [{}] 个 <=====", eventEntityList.size());
 	}
 
 	private void getRbrUpdateRowsEventData(Event event, List<EventEntity> eventEntityList, UpdateRowsEventData updateRowsEventData, TableMetaEntity tableMetaEntity) {
@@ -163,12 +171,15 @@ public class UpdateEventParser implements IEventParser {
 				columns.add(columnMetaDataList.get(i).getName());
 				changeBefore.add(before[i]);
 				changeAfter.add(after[i]);
-				if (!Objects.equals(before[i], after[i])) {
+				if (!Objects.equals(before[i], after[i])||Objects.equals(columnMetaDataList.get(i).getName(),"data_origin")) {
 					columnData.put(columnMetaDataList.get(i).getName(), after[i]);
 				}
 			}
-			if (queryVerifyData(after, tableMetaEntity, columnData)) {
+//			if (queryVerifyData(after,tableMetaEntity,columnData)) {
+			if (queryVerifyDataOrigin(columnData)) {
 				return;
+			} else {
+				columnData.put("data_origin", "02");
 			}
 			EventEntity eventEntity = new EventEntity();
 			eventEntity.setEvent(event);
@@ -182,11 +193,13 @@ public class UpdateEventParser implements IEventParser {
 			eventEntity.setChangeAfter(changeAfter);
 			eventEntity.setColumnData(columnData);
 			eventEntity.setDataId(after[0]);
-			String updateTime = String.valueOf(columnData.get("update_time"));
+			String updateTime = (String) Optional.ofNullable(columnData.get("create_time")).orElse(columnData.get("create_time"));
 			eventEntity.setSyncIdent(Objects.isNull(DateUtil.parse(updateTime)) ? null : DateUtil.parse(updateTime).getTime());
 
 			eventEntityList.add(eventEntity);
 		});
+		log.debug("=====> [RBR-UPDATE] 事件同步[eventEntity]实体 [{}] 个 <=====", eventEntityList.size());
+
 	}
 
 	/**
@@ -221,5 +234,23 @@ public class UpdateEventParser implements IEventParser {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * 说明：TODO RBR 模式 【修改】 根据 [data_origin] 字段值 ，验证是否同步
+	 *
+	 * @param columnData
+	 * @return boolean
+	 * @date: 2022-8-15 13:11
+	 * @throws:
+	 */
+	private boolean queryVerifyDataOrigin(Map<String, Object> columnData) {
+		String origin = (String) Optional.ofNullable(columnData.get("data_origin")).orElse(columnData.get("data_origin"));
+		if (!Objects.isNull(origin) && origin.equals(syncConfig.getDataOrigin())) {
+			log.info("=====> [RBR-UPDATE] 数据同步源字段 [data_origin] - Value： [{}] ，同步数据：[{}]  <=====", origin, JSONUtils.toJSONString(columnData));
+			return false;
+		}
+		log.info("=====> [RBR-UPDATE] 数据同步源字段 [data_origin]" + (origin == null ? "为空" : "Value：[{}] ") + "， 同步数据：[{}]  <=====");
+		return true;
 	}
 }

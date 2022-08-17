@@ -51,10 +51,14 @@ public class DeleteEventParser implements IEventParser {
 		if (event.getData() instanceof DeleteRowsEventData) {
 			DeleteRowsEventData deleteRowsEventData = event.getData();
 			TableMetaEntity tableMetaEntity = tableMetaFactory.getTableMetaEntity(deleteRowsEventData.getTableId());
+			log.debug("=====> 进入 [RBR-DELETE] 事件信息处理：[{}] <=====",Optional.ofNullable(tableMetaEntity).orElse(tableMetaEntity));
+
 			/**
 			 * 如已配置 指定数据库名 或 数据库表 则根据配置表信息同步
 			 */
 			if (StringUtils.isDbOrTableNull(syncConfig, tableMetaEntity)) {
+				log.info("=====> 进入指定配置 [RBR-DELETE] 事件同步[tableMetaEntity] 表 [{}] 个 <=====", tableMetaEntity.toString());
+
 				getRbrDeleteRowsEventData(event, eventEntityList, deleteRowsEventData, tableMetaEntity);
 			}
 
@@ -62,6 +66,8 @@ public class DeleteEventParser implements IEventParser {
 			 * 如未配置指定库和表名则所有同步
 			 */
 			if (StringUtils.isDbAndTableNull(syncConfig)) {
+				log.info("=====> 进入全量配置 [RBR-DELETE] 事件同步[tableMetaEntity] 表 [{}] 个 <=====", tableMetaEntity.toString());
+
 				getRbrDeleteRowsEventData(event, eventEntityList, deleteRowsEventData, tableMetaEntity);
 			}
 		}
@@ -71,6 +77,8 @@ public class DeleteEventParser implements IEventParser {
 		 */
 		if (event.getData() instanceof QueryEventData) {
 			QueryEventData queryEventData = event.getData();
+			log.debug("=====> 进入 [SBR-DELETE] 事件信息处理：[{}] <=====",event.getData().toString());
+
 			/**
 			 * 如已配置 指定数据库名 或 数据库表 则根据配置表信息同步
 			 */
@@ -84,16 +92,17 @@ public class DeleteEventParser implements IEventParser {
 				getSbrEventEntityList(event, eventEntityList, queryEventData);
 			}
 		}
-		log.debug("=====> [删除] 事件实体对象 [{}] 个 <=====", eventEntityList.size());
+
 		return eventEntityList;
 	}
 
 	private boolean queryVerifyDataById(QueryEventData queryEventData) throws BinlogPortalException {
 		String key = String.format("%s-%s-%s-%s", queryEventData.getDatabase(), StringUtils.getTableName(queryEventData.getSql()), "sbr-delelte", StringUtils.getDataId(queryEventData.getSql()));
+		log.info("=====> Redis.delete-key：{}] <=====", key);
 		String value = positionHandler.getCacheObject(key);
-		log.debug("=====> Redis.delete-Value：[{}] <=====", value);
+		log.info("=====> Redis.delete-Value：[{}] <=====", value);
 		if (Objects.isNull(value)) {
-			log.debug("=====> Entity.delete-Key：[{}] <=====", key);
+			log.info("=====> Entity.delete-Key：[{}] <=====", key);
 			value = StringUtils.getTableName(queryEventData.getSql()).concat("-" + StringUtils.getDataId(queryEventData.getSql()));
 			positionHandler.setCacheObject(key, value, CommonConstants.TIMEOUT, TimeUnit.MINUTES);
 			return true;
@@ -114,6 +123,9 @@ public class DeleteEventParser implements IEventParser {
 		eventEntity.setSql(queryEventData.getSql());
 		eventEntity.setSyncIdent(Long.valueOf(StringUtils.getDataId(queryEventData.getSql())));
 		eventEntityList.add(eventEntity);
+		log.debug("=====> [SBR-DELETE] 事件同步[eventEntity]实体 [{}] 个 <=====", eventEntityList.size());
+
+
 	}
 
 	private void getRbrDeleteRowsEventData(Event event, List<EventEntity> eventEntityList, DeleteRowsEventData deleteRowsEventData, TableMetaEntity tableMetaEntity) {
@@ -129,8 +141,11 @@ public class DeleteEventParser implements IEventParser {
 				changeAfter.add(after[i]);
 				columnData.put(columnMetaDataList.get(i).getName(), after[i]);
 			}
-			if (queryVerifyData(after, tableMetaEntity, columnData)) {
+//			if (queryVerifyData(after, tableMetaEntity, columnData)) {
+			if (queryVerifyDataOrigin(columnData)) {
 				return;
+			} else {
+				columnData.put("data_origin", "02");
 			}
 			EventEntity eventEntity = new EventEntity();
 			eventEntity.setEvent(event);
@@ -147,8 +162,21 @@ public class DeleteEventParser implements IEventParser {
 
 			eventEntityList.add(eventEntity);
 		});
+		log.debug("=====> [RBR-DELETE] 事件同步[eventEntity] 实体 [{}] 个 <=====", eventEntityList.size());
+
+
 	}
 
+	/**
+	 * 说明：TODO RBR 模式 根据时间字段缓存 删除 验证是否同步
+	 *
+	 * @param after
+	 * @param eventEntity
+	 * @param columnData
+	 * @return boolean
+	 * @date: 2022-8-15 14:09
+	 * @throws:
+	 */
 	private boolean queryVerifyData(String[] after, TableMetaEntity eventEntity, Map<String, Object> columnData) {
 		String key = eventEntity.getDbName().concat("-").concat(eventEntity.getTableName()).concat("-rbr-delete-").concat(after[0]);
 		if (Objects.isNull(columnData)) {
@@ -172,5 +200,24 @@ public class DeleteEventParser implements IEventParser {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * 说明：TODO RBR 模式 【删除】 根据 [data_origin] 字段值 ，验证是否同步
+	 *
+	 * @param columnData
+	 * @return boolean
+	 * @date: 2022-8-15 13:11
+	 * @throws:
+	 */
+	private boolean queryVerifyDataOrigin(Map<String, Object> columnData) {
+		String origin = (String) Optional.ofNullable(columnData.get("data_origin")).orElse(columnData.get("data_origin"));
+		if (!Objects.isNull(origin) && origin.equals(syncConfig.getDataOrigin())) {
+			log.info("=====> [RBR-DELETE] 数据同步源字段 [data_origin] Value： [{}]  <=====", origin);
+			return false;
+		}
+		log.info("=====> [RBR-DELETE] 数据同步源字段 [data_origin]" + (origin == null ? "为空" : "Value：[{}] ") + "， 同步数据：[{}]  <=====");
+
+		return true;
 	}
 }

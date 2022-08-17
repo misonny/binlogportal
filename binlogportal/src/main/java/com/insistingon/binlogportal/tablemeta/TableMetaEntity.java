@@ -73,4 +73,15 @@ public class TableMetaEntity {
     public void setCreateSql(String createSql) {
         this.createSql = createSql;
     }
+
+    @Override
+    public String toString() {
+        return "TableMetaEntity{" +
+                "tableId=" + tableId +
+                ", dbName='" + dbName + '\'' +
+                ", tableName='" + tableName + '\'' +
+                ", columnMetaDataList=" + columnMetaDataList +
+                ", createSql='" + createSql + '\'' +
+                '}';
+    }
 }

@@ -79,8 +79,12 @@ public class StringUtils extends org.apache.commons.lang.StringUtils {
 		return false;
 	}
 
+	public static Boolean isDbInclude(String database){
+
+		return false;
+	}
 	/**
-	 * 说明：TODO SBR模式 指定数据库 和 表过滤验证
+	 * 说明：TODO  指定数据库 和 表过滤验证
 	 *
 	 * @param queryEventData
 	 * @return java.lang.Boolean
@@ -109,7 +113,10 @@ public class StringUtils extends org.apache.commons.lang.StringUtils {
 	 */
 	public static Boolean isDbOrTableNull(SyncConfig syncConfig, TableMetaEntity tableMetaEntity) {
 		if ((!Objects.isNull(tableMetaEntity) && CollectionUtils.isNotEmpty(syncConfig.getDatabaseName()) && CollectionUtils.isNotEmpty(syncConfig.getDataTables()))) {
-			if (syncConfig.getDatabaseName().contains(tableMetaEntity.getDbName()) && syncConfig.getDataTables().contains(getTableName(tableMetaEntity.getTableName()))) {
+//			if (syncConfig.getDatabaseName().contains(tableMetaEntity.getDbName()) && syncConfig.getDataTables().contains(getTableName(tableMetaEntity.getTableName()))) {
+//				return true;
+//			}
+			if (syncConfig.getDataTables().contains(getTableName(tableMetaEntity.getTableName()))) {
 				return true;
 			}
 		}

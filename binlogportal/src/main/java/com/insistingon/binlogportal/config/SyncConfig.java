@@ -17,6 +17,7 @@ public class SyncConfig {
 	List<IEventHandler> eventHandlerList = new ArrayList<>();
 	List<String> databaseName = new ArrayList<>();
 	List<String> dataTables = new ArrayList<>();
+	String dataOrigin;
 
 	public SyncConfig() {
 	}
@@ -88,6 +89,14 @@ public class SyncConfig {
 		this.dataTables = dataTables;
 	}
 
+	public String getDataOrigin() {
+		return dataOrigin;
+	}
+
+	public void setDataOrigin(String dataOrigin) {
+		this.dataOrigin = dataOrigin;
+	}
+
 	@Override
 	public String toString() {
 		return "SyncConfig{" +
@@ -98,6 +107,7 @@ public class SyncConfig {
 				", eventHandlerList=" + eventHandlerList +
 				", databaseName=" + databaseName +
 				", dataTables=" + dataTables +
+				", dataOrigin='" + dataOrigin + '\'' +
 				'}';
 	}
 }

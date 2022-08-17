@@ -57,10 +57,14 @@ public class InsertEventParser implements IEventParser {
 		if (event.getData() instanceof WriteRowsEventData) {
 			WriteRowsEventData writeRowsEventData = event.getData();
 			TableMetaEntity tableMetaEntity = tableMetaFactory.getTableMetaEntity(writeRowsEventData.getTableId());
+			log.debug("=====> 进入 [RBR-INSERT] 事件信息处理：[{}] <=====",Optional.ofNullable(tableMetaEntity).orElse(tableMetaEntity));
+
 			/**
 			 * 如已配置 指定数据库名 或 数据库表 则根据配置表信息同步
 			 */
 			if (StringUtils.isDbOrTableNull(syncConfig, tableMetaEntity)) {
+				log.info("=====> 进入指定配置 [RBR-INSERT] 事件同步[tableMetaEntity] 表 [{}] 个 <=====", tableMetaEntity.toString());
+
 				getRbrWriteRowsEventData(event, eventEntityList, writeRowsEventData, tableMetaEntity);
 			}
 
@@ -68,6 +72,8 @@ public class InsertEventParser implements IEventParser {
 			 * 如未配置指定库和表名则所有同步
 			 */
 			if (StringUtils.isDbAndTableNull(syncConfig)) {
+				log.info("=====> 进入全量配置 [RBR-INSERT] 事件同步[tableMetaEntity] 表 [{}] 个 <=====", tableMetaEntity.toString());
+
 				getRbrWriteRowsEventData(event, eventEntityList, writeRowsEventData, tableMetaEntity);
 			}
 		}
@@ -77,6 +83,8 @@ public class InsertEventParser implements IEventParser {
 		 */
 		if (event.getData() instanceof QueryEventData) {
 			QueryEventData queryEventData = event.getData();
+			log.debug("=====> 进入 [SBR-INSERT] 事件信息处理：[{}] <=====",event.getData().toString());
+
 			/**
 			 * 如已配置 指定数据库名 或 数据库表 则根据配置表信息同步
 			 */
@@ -90,26 +98,53 @@ public class InsertEventParser implements IEventParser {
 				getSbrWriteEventEntity(event, eventEntityList, queryEventData);
 			}
 		}
-		log.debug("=====> [新增] 事件实体对象 [{}] 个 <=====", eventEntityList.size());
 		return eventEntityList;
 	}
 
-
+	/**
+	 * 说明：TODO 根据当前数据库表 ID 和 创建时间 缓存判断数据是否同步
+	 *
+	 * @param queryEventData
+	 * @return boolean
+	 * @date: 2022-8-15 11:00
+	 * @throws: SQLException BinlogPortalException
+	 */
 	private boolean queryVerifyDataById(QueryEventData queryEventData) throws SQLException, BinlogPortalException {
 		DataSource source = DruidDSFactory.get(queryEventData.getDatabase());
 		Entity entity = Db.use(source).queryOne(String.format("select * from %s where id=%s", StringUtils.getTableName(queryEventData.getSql()), StringUtils.getDataId(queryEventData.getSql())));
 
 		String key = queryEventData.getDatabase().concat("-").concat(StringUtils.getTableName(queryEventData.getSql())).concat("-sbr-insert-").concat(StringUtils.getDataId(queryEventData.getSql()));
-		Long createTime = Objects.isNull(entity.getDate("create_time")) == true ? null : entity.getDate("create_time").getTime();
+		Long createTime = Objects.isNull(entity.getDate("create_time")) ? null : entity.getDate("create_time").getTime();
+		log.info("=====> Redis.update-key：{} ，Entity.create_time：[{}] <=====", key, createTime);
 		Long time = positionHandler.getCacheObject(key);
-		log.debug("=====> Redis.create_time：{} ，Entity.create_time：[{}] <=====", time, createTime);
+		log.info("=====> Redis.update-value：{} ，Entity.create_time：[{}] <=====", time, createTime);
 		if (!Objects.isNull(createTime) && !createTime.equals(time)) {
-			log.debug("=====> Entity.create_time：[{}] ，Redis.create_time [{}] <=====", createTime, time);
+			log.info("=====> Entity.create_time：[{}] ，Redis.create_time [{}] <=====", createTime, time);
 			positionHandler.setCacheObject(key, createTime, CommonConstants.TIMEOUT, TimeUnit.MINUTES);
 			return true;
 		}
 
 		log.info("=====> [SBR-INSERT] 数据创建时间字段 [create_time] 不存在！或 数据创建时间 [{}] 与 缓存创建时间 [{}] 相同、跳出同步! <=====", createTime, time);
+		return false;
+	}
+
+	/**
+	 * 说明：TODO 使用数据来源ID的方式
+	 *
+	 * @param queryEventData
+	 * @return boolean
+	 * @date: 2022-8-15 11:02
+	 * @throws:
+	 */
+	private boolean queryVerifyDataByOrigin(QueryEventData queryEventData) throws SQLException, BinlogPortalException {
+		Entity entity = Db.use(DruidDSFactory.get(queryEventData.getDatabase())).queryOne(String.format("select * from %s where id=%s", StringUtils.getTableName(queryEventData.getSql()), StringUtils.getDataId(queryEventData.getSql())));
+
+		if (!Objects.isNull(entity.getStr("data_origin")) && entity.getStr("data_origin").equals(syncConfig.getDataOrigin())) {
+			log.info("=====> [SBR-INSERT] 数据同步源 value：[{}] , DB 获取到数据信息：[{}] <=====", entity.getStr("data_origin"), entity.toString());
+			return true;
+		}
+
+		log.info("=====> [SBR-INSERT] DB Entity.data_origin is null , Unable to sync !<=====");
 		return false;
 	}
 
@@ -126,6 +161,9 @@ public class InsertEventParser implements IEventParser {
 		eventEntity.setSql(queryEventData.getSql());
 		eventEntity.setSyncIdent(Objects.isNull(entity.getDate("create_time")) ? null : entity.getDate("create_time").getTime());
 		eventEntityList.add(eventEntity);
+
+		log.debug("=====> [SBR-INSERT] 事件同步[eventEntity]实体 [{}] 个 <=====", eventEntityList.size());
+
 	}
 
 	private void getRbrWriteRowsEventData(Event event, List<EventEntity> eventEntityList, WriteRowsEventData writeRowsEventData, TableMetaEntity tableMetaEntity) {
@@ -143,9 +181,13 @@ public class InsertEventParser implements IEventParser {
 				columnData.put(columnMetaDataList.get(i).getName(), after[i]);
 			}
 
-			if (queryVerifyData(after, tableMetaEntity, columnData)) {
+//			if (queryVerifyData(after, tableMetaEntity, columnData)) {
+			if (queryVerifyDataOrigin(columnData)) {
 				return;
+			} else {
+				columnData.put("data_origin", "02");
 			}
+
 			EventEntity eventEntity = new EventEntity();
 			eventEntity.setEvent(event);
 			eventEntity.setEventEntityType(EventEntityType.INSERT);
@@ -157,13 +199,25 @@ public class InsertEventParser implements IEventParser {
 			eventEntity.setChangeAfter(changeAfter);
 			eventEntity.setColumnData(columnData);
 			eventEntity.setDataId(after[0]);
-			String createTime = String.valueOf(Optional.ofNullable(columnData.get("create_time")).orElse(null));
+			String createTime = String.valueOf(Optional.ofNullable(columnData.get("create_time")).orElse(columnData.get("create_time")));
 			eventEntity.setSyncIdent(Objects.isNull(createTime) ? null : DateUtil.parse(createTime).getTime());
 
 			eventEntityList.add(eventEntity);
 		});
+		log.debug("=====> [RBR-INSERT] 事件同步[eventEntity]实体 [{}] 个 <=====", eventEntityList.size());
+
 	}
 
+	/**
+	 * 说明：TODO 根据创建时间字段缓存 验证 是否同步
+	 *
+	 * @param after
+	 * @param eventEntity
+	 * @param columnData
+	 * @return boolean
+	 * @date: 2022-8-15 13:10
+	 * @throws:
+	 */
 	private boolean queryVerifyData(String[] after, TableMetaEntity eventEntity, Map<String, Object> columnData) {
 		String key = eventEntity.getDbName().concat("-").concat(eventEntity.getTableName()).concat("-rbr-insert-").concat(after[0]);
 		if (Objects.isNull(columnData)) {
@@ -187,5 +241,24 @@ public class InsertEventParser implements IEventParser {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * 说明：TODO RBR模式 【新增】 根据 [data_origin] 字段值 ，验证是否同步
+	 *
+	 * @param columnData
+	 * @return boolean
+	 * @date: 2022-8-15 13:11
+	 * @throws:
+	 */
+	private boolean queryVerifyDataOrigin(Map<String, Object> columnData) {
+		String origin = (String) Optional.ofNullable(columnData.get("data_origin")).orElse(columnData.get("data_origin"));
+		if (!Objects.isNull(origin) && origin.equals(syncConfig.getDataOrigin())) {
+			log.info("=====> [RBR-INSERT] 数据同步源字段 [data_origin] Value： [{}]  <=====", origin);
+			return false;
+		}
+		log.info("=====> [RBR-INSERT] 数据同步源字段 [data_origin]" + (origin == null ? "为空" : "Value：[{}] ") + "， 同步数据：[{}]  <=====");
+
+		return true;
 	}
 }
