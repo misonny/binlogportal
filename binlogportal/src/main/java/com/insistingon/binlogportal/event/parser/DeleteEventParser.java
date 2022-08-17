@@ -51,13 +51,12 @@ public class DeleteEventParser implements IEventParser {
 		if (event.getData() instanceof DeleteRowsEventData) {
 			DeleteRowsEventData deleteRowsEventData = event.getData();
 			TableMetaEntity tableMetaEntity = tableMetaFactory.getTableMetaEntity(deleteRowsEventData.getTableId());
-			log.debug("=====> 进入 [RBR-DELETE] 事件信息处理：[{}] <=====",Optional.ofNullable(tableMetaEntity).orElse(tableMetaEntity));
 
 			/**
 			 * 如已配置 指定数据库名 或 数据库表 则根据配置表信息同步
 			 */
 			if (StringUtils.isDbOrTableNull(syncConfig, tableMetaEntity)) {
-				log.info("=====> 进入指定配置 [RBR-DELETE] 事件同步[tableMetaEntity] 表 [{}] 个 <=====", tableMetaEntity.toString());
+				log.debug("=====> 进入 [RBR-DELETE] 指定配置 事件同步[tableMetaEntity] 表信息 [{}]  <=====", tableMetaEntity.toString());
 
 				getRbrDeleteRowsEventData(event, eventEntityList, deleteRowsEventData, tableMetaEntity);
 			}
@@ -66,7 +65,7 @@ public class DeleteEventParser implements IEventParser {
 			 * 如未配置指定库和表名则所有同步
 			 */
 			if (StringUtils.isDbAndTableNull(syncConfig)) {
-				log.info("=====> 进入全量配置 [RBR-DELETE] 事件同步[tableMetaEntity] 表 [{}] 个 <=====", tableMetaEntity.toString());
+				log.debug("=====> 进入 [RBR-DELETE] 全量配置 事件同步[tableMetaEntity] 表信息 [{}]  <=====", tableMetaEntity.toString());
 
 				getRbrDeleteRowsEventData(event, eventEntityList, deleteRowsEventData, tableMetaEntity);
 			}
@@ -77,7 +76,7 @@ public class DeleteEventParser implements IEventParser {
 		 */
 		if (event.getData() instanceof QueryEventData) {
 			QueryEventData queryEventData = event.getData();
-			log.debug("=====> 进入 [SBR-DELETE] 事件信息处理：[{}] <=====",event.getData().toString());
+			log.debug("=====> 进入 [SBR-DELETE] 事件信息处理：[{}] <=====", event.getData().toString());
 
 			/**
 			 * 如已配置 指定数据库名 或 数据库表 则根据配置表信息同步

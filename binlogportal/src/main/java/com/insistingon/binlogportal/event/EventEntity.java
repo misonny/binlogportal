@@ -212,11 +212,11 @@ public class EventEntity {
 			for (int i = 0; i < this.getColumnsData().size(); i++) {
 				String before = "";
 				if (this.getChangeBefore() != null) {
-					before = this.getChangeBefore().get(i) != null ? this.getChangeBefore().get(i).toString() : "";
+					before = this.getChangeBefore().get(i) != null ? this.getChangeBefore().get(i).toString() : null;
 				}
 				String after = "";
 				if (this.getChangeAfter() != null) {
-					after = this.getChangeAfter().get(i) != null ? this.getChangeAfter().get(i).toString() : "";
+					after = this.getChangeAfter().get(i) != null ? this.getChangeAfter().get(i).toString() : null;
 				}
 				String[] subData = new String[]{
 						before,

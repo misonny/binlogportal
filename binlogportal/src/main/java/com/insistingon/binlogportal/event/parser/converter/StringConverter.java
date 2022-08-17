@@ -26,7 +26,7 @@ public class StringConverter implements IConverter<String> {
     @Override
     public String convert(Object from, String type) {
         if (from == null) {
-            return "";
+            return null;
         }
         List<String> timeToStringTypeList = Arrays.asList("DATETIME", "TIMESTAMP");
         if (timeToStringTypeList.contains(type)) {

@@ -1,87 +1,88 @@
 package com.insistingon.binlogportal.tablemeta;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * @author Administrator
  */
 public class TableMetaEntity {
-    private Long tableId;
-    private String dbName;
-    private String tableName;
-    private List<ColumnMetaData> columnMetaDataList = new ArrayList<ColumnMetaData>();
-    private String createSql;
+	private Long tableId;
+	private String dbName;
+	private String tableName;
+	private List<ColumnMetaData> columnMetaDataList = new ArrayList<ColumnMetaData>();
+	private String createSql;
 
-    public static class ColumnMetaData {
-        String name;
-        String type;
+	public static class ColumnMetaData {
+		String name;
+		String type;
 
-        public String getName() {
-            return name;
-        }
+		public String getName() {
+			return name;
+		}
 
-        public void setName(String name) {
-            this.name = name;
-        }
+		public void setName(String name) {
+			this.name = name;
+		}
 
-        public String getType() {
-            return type;
-        }
+		public String getType() {
+			return type;
+		}
 
-        public void setType(String type) {
-            this.type = type;
-        }
-    }
+		public void setType(String type) {
+			this.type = type;
+		}
+	}
 
-    public Long getTableId() {
-        return tableId;
-    }
+	public Long getTableId() {
+		return tableId;
+	}
 
-    public void setTableId(Long tableId) {
-        this.tableId = tableId;
-    }
+	public void setTableId(Long tableId) {
+		this.tableId = tableId;
+	}
 
-    public String getDbName() {
-        return dbName;
-    }
+	public String getDbName() {
+		return dbName;
+	}
 
-    public void setDbName(String dbName) {
-        this.dbName = dbName;
-    }
+	public void setDbName(String dbName) {
+		this.dbName = dbName;
+	}
 
-    public String getTableName() {
-        return tableName;
-    }
+	public String getTableName() {
+		return tableName;
+	}
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
 
-    public List<ColumnMetaData> getColumnMetaDataList() {
-        return columnMetaDataList;
-    }
+	public List<ColumnMetaData> getColumnMetaDataList() {
+		return columnMetaDataList;
+	}
 
-    public void setColumnMetaDataList(List<ColumnMetaData> columnMetaDataList) {
-        this.columnMetaDataList = columnMetaDataList;
-    }
+	public void setColumnMetaDataList(List<ColumnMetaData> columnMetaDataList) {
+		this.columnMetaDataList = columnMetaDataList;
+	}
 
-    public String getCreateSql() {
-        return createSql;
-    }
+	public String getCreateSql() {
+		return createSql;
+	}
 
-    public void setCreateSql(String createSql) {
-        this.createSql = createSql;
-    }
+	public void setCreateSql(String createSql) {
+		this.createSql = createSql;
+	}
 
-    @Override
-    public String toString() {
-        return "TableMetaEntity{" +
-                "tableId=" + tableId +
-                ", dbName='" + dbName + '\'' +
-                ", tableName='" + tableName + '\'' +
-                ", columnMetaDataList=" + columnMetaDataList +
-                ", createSql='" + createSql + '\'' +
-                '}';
-    }
+	@Override
+	public String toString() {
+		return "TableMetaEntity{" +
+				"tableId=" + tableId +
+				", dbName=" + dbName +
+				", tableName=" + tableName +
+				", columnMetaDataList=" + Arrays.toString(columnMetaDataList.toArray()) +
+				", createSql=" + createSql +
+				'}';
+	}
 }

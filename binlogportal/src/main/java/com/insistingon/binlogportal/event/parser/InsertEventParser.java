@@ -57,13 +57,12 @@ public class InsertEventParser implements IEventParser {
 		if (event.getData() instanceof WriteRowsEventData) {
 			WriteRowsEventData writeRowsEventData = event.getData();
 			TableMetaEntity tableMetaEntity = tableMetaFactory.getTableMetaEntity(writeRowsEventData.getTableId());
-			log.debug("=====> 进入 [RBR-INSERT] 事件信息处理：[{}] <=====",Optional.ofNullable(tableMetaEntity).orElse(tableMetaEntity));
 
 			/**
 			 * 如已配置 指定数据库名 或 数据库表 则根据配置表信息同步
 			 */
 			if (StringUtils.isDbOrTableNull(syncConfig, tableMetaEntity)) {
-				log.info("=====> 进入指定配置 [RBR-INSERT] 事件同步[tableMetaEntity] 表 [{}] 个 <=====", tableMetaEntity.toString());
+				log.debug("=====> 进入[RBR-INSERT] 指定配置 事件同步[tableMetaEntity] 表信息 [{}] <=====", tableMetaEntity.toString());
 
 				getRbrWriteRowsEventData(event, eventEntityList, writeRowsEventData, tableMetaEntity);
 			}
@@ -72,7 +71,7 @@ public class InsertEventParser implements IEventParser {
 			 * 如未配置指定库和表名则所有同步
 			 */
 			if (StringUtils.isDbAndTableNull(syncConfig)) {
-				log.info("=====> 进入全量配置 [RBR-INSERT] 事件同步[tableMetaEntity] 表 [{}] 个 <=====", tableMetaEntity.toString());
+				log.debug("=====> 进入 [RBR-INSERT] 全量配置 事件同步[tableMetaEntity] 表信息 [{}] <=====", tableMetaEntity.toString());
 
 				getRbrWriteRowsEventData(event, eventEntityList, writeRowsEventData, tableMetaEntity);
 			}
@@ -178,7 +177,9 @@ public class InsertEventParser implements IEventParser {
 			for (int i = 0; i < after.length; i++) {
 				columns.add(columnMetaDataList.get(i).getName());
 				changeAfter.add(after[i]);
-				columnData.put(columnMetaDataList.get(i).getName(), after[i]);
+				if (Objects.nonNull(after[i])) {
+					columnData.put(columnMetaDataList.get(i).getName(), after[i]);
+				}
 			}
 
 //			if (queryVerifyData(after, tableMetaEntity, columnData)) {
@@ -253,12 +254,10 @@ public class InsertEventParser implements IEventParser {
 	 */
 	private boolean queryVerifyDataOrigin(Map<String, Object> columnData) {
 		String origin = (String) Optional.ofNullable(columnData.get("data_origin")).orElse(columnData.get("data_origin"));
+		log.info("=====> [RBR-INSERT] 数据同步源字段 [data_origin] - " + (origin == null ? "为空!" : "Value：[{}] ") + "， 同步数据：[{}]  <=====",origin,Arrays.toString(new Map[]{columnData}));
 		if (!Objects.isNull(origin) && origin.equals(syncConfig.getDataOrigin())) {
-			log.info("=====> [RBR-INSERT] 数据同步源字段 [data_origin] Value： [{}]  <=====", origin);
 			return false;
 		}
-		log.info("=====> [RBR-INSERT] 数据同步源字段 [data_origin]" + (origin == null ? "为空" : "Value：[{}] ") + "， 同步数据：[{}]  <=====");
-
 		return true;
 	}
 }

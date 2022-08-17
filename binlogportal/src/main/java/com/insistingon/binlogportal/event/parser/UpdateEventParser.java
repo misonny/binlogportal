@@ -59,12 +59,12 @@ public class UpdateEventParser implements IEventParser {
 
 			UpdateRowsEventData updateRowsEventData = event.getData();
 			TableMetaEntity tableMetaEntity = tableMetaFactory.getTableMetaEntity(updateRowsEventData.getTableId());
-			log.debug("=====> 进入 [RBR-UPDATE] 事件信息处理：[{}] <=====", Optional.ofNullable(tableMetaEntity).orElse(tableMetaEntity));
+
 			/**
 			 * 如已配置 指定数据库名 或 数据库表 则根据配置表信息同步
 			 */
 			if (StringUtils.isDbOrTableNull(syncConfig, tableMetaEntity)) {
-				log.info("=====> 进入指定配置 [RBR-UPDATE] 事件同步[tableMetaEntity] 表 [{}] 个 <=====", tableMetaEntity.toString());
+				log.info("=====> 进入 [RBR-UPDATE] 指定配置 事件同步[tableMetaEntity] 表信息 [{}] <=====", tableMetaEntity.toString());
 
 				getRbrUpdateRowsEventData(event, eventEntityList, updateRowsEventData, tableMetaEntity);
 
@@ -74,7 +74,7 @@ public class UpdateEventParser implements IEventParser {
 			 * 如未配置指定库和表名则所有同步
 			 */
 			if (StringUtils.isDbAndTableNull(syncConfig)) {
-				log.info("=====> 进入全量配置 [RBR-UPDATE] 事件同步[tableMetaEntity] 表 [{}] 个 <=====", tableMetaEntity.toString());
+				log.info("=====> 进入[RBR-UPDATE] 全量配置 事件同步[tableMetaEntity] 表信息 [{}] <=====", tableMetaEntity.toString());
 
 				getRbrUpdateRowsEventData(event, eventEntityList, updateRowsEventData, tableMetaEntity);
 			}
@@ -86,13 +86,12 @@ public class UpdateEventParser implements IEventParser {
 		 */
 		if (event.getData() instanceof QueryEventData) {
 			QueryEventData queryEventData = event.getData();
-			log.debug("=====> 进入 [SBR-UPDATE] 事件信息处理：[{}] <=====", event.getData().toString());
-
 
 			/**
 			 * 如已配置 指定数据库名 或 数据库表 则根据配置表信息同步
 			 */
 			if (StringUtils.isDbOrTableNull(syncConfig, queryEventData) && queryDataById(queryEventData)) {
+
 				getSbrUpdateEventEntity(event, eventEntityList, queryEventData);
 			}
 
