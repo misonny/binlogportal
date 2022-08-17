@@ -13,6 +13,7 @@ public class DbConfig {
     List<String> handlerList;
     List<String> databaseName;
     List<String> dataTables;
+    String dataOrigin;
 
 
 
@@ -70,5 +71,13 @@ public class DbConfig {
 
     public void setDataTables(List<String> dataTables) {
         this.dataTables = dataTables;
+    }
+
+    public String getDataOrigin() {
+        return dataOrigin;
+    }
+
+    public void setDataOrigin(String dataOrigin) {
+        this.dataOrigin = dataOrigin;
     }
 }
